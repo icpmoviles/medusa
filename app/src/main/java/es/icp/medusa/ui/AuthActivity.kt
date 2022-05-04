@@ -1,0 +1,177 @@
+package es.icp.medusa.ui
+
+import android.accounts.Account
+import android.accounts.AccountManager
+import android.app.AlarmManager
+import android.app.PendingIntent
+import android.content.Context
+import android.content.Intent
+import androidx.appcompat.app.AppCompatActivity
+import android.os.Bundle
+import android.text.TextUtils
+import android.util.Base64
+import android.widget.Toast
+import androidx.core.widget.doOnTextChanged
+import com.google.gson.Gson
+import es.icp.icp_commons.Extensions.addSeconds
+import es.icp.icp_commons.Extensions.texto
+import es.icp.icp_commons.Helpers.PasswordStorageHelper
+import es.icp.medusa.authenticator.*
+import es.icp.medusa.databinding.ActivityAuthBinding
+import es.icp.medusa.modelo.TokenResponse
+import es.icp.medusa.repo.WebServiceLogin
+import es.icp.medusa.repo.interfaces.RepoResponse
+import java.util.*
+
+class AuthActivity : AppCompatActivity() {
+
+
+    private lateinit var binding: ActivityAuthBinding
+    private lateinit var context: Context
+    private lateinit var am : AccountManager
+    private var nameAccount: String = ""
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        binding = ActivityAuthBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        context = this
+        setUpView()
+    }
+
+    private fun setUpView() {
+        supportActionBar?.hide()
+        nameAccount = intent.getStringExtra(KEY_NAME_ACCOUNT) ?: ""
+        setListeners()
+        am = AccountManager.get(context)
+        if (!nameAccount.isNullOrBlank()){
+            binding.txtuserNameLogin.texto(nameAccount)
+            binding.txtpasswordLogin.requestFocus()
+        }
+
+
+
+//        binding.btnLogin.setOnClickListener {
+////            val launch = packageManager.getLaunchIntentForPackage("es.icp.perseo_kt")
+////
+//            val intent = Intent(Intent.ACTION_MAIN)
+//            intent.setClassName(packageName, "$packageName.ui.mainview.MainActivity")
+//            intent.putExtra("extra", "aqui mandamos la cuenta si se autentifico")
+//            startActivity(intent)
+//            finish()
+//        }
+    }
+
+    private fun finishLogin(user: String, pass: String) {
+
+        val passB64 = Base64.encodeToString(pass.toByteArray(), Base64.NO_WRAP)
+
+        WebServiceLogin.doLogin(
+            context,
+            user,
+            passB64,
+            object: RepoResponse {
+                override fun respuesta(response: Any) {
+                    if (response is TokenResponse) {
+                        // login correcto -> creacion de cuenta
+                        // aplicamos a la respuesta el tiempo de expiracion
+                        response.dateExpire = Date().addSeconds(response.expiresIn)
+                        //Creamos la cuenta y el bundle de datos de usario(contendra el response)
+                        val account = Account(user, MY_ACCOUNT_TYPE)
+                        val userData = Bundle()
+                        //añadimos el response en json al bundle
+                        userData.putString(KEY_USERDATA_TOKEN, Gson().toJson(response))
+                        // borramos la cuenta si ya existe
+                        am.removeAccountExplicitly(account)
+                        // creamos la cuenta
+                        am.addAccountExplicitly(account, pass, userData)
+                        // le metemos el token a la cuenta
+                        am.setAuthToken(account, MY_AUTH_TOKEN_TYPE, response.accessToken)
+
+
+                        PasswordStorageHelper(context).setData("userName", user.toByteArray())
+
+                        val date = Date()
+                        val expira = date.addSeconds(20)
+
+                        setAlarm(expira.time)
+
+
+                        // creamos bundle de respuesta con la cuenta loggeada
+                        val bundle = Bundle().apply {
+                            putParcelable(KEY_BUNDLE_ACCOUNT, account)
+                        }
+                        // añadimos el bundle con la cuenta al intent
+                        val intent = Intent().also {
+                            it.putExtra(KEY_BUNDLE_ACCOUNT, bundle)
+                        }
+                        // mandamos el resultado de vuelta
+                        // no hace falta mandar resultado si no ha sido
+                        //satisfactorio el login, ya se controla esto a la vuelta
+                        setResult(RESULT_OK, intent)
+                        finish()
+                    } else {
+                        Toast.makeText(context, "Usuario o contraseña incorrectos", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+        )
+    }
+
+    private fun setAlarm(time: Long) {
+        //obteniendo el administrador de alarmas
+        val am = getSystemService(ALARM_SERVICE) as AlarmManager
+
+        //creando una nueva intención especificando el receptor de transmisión
+        val i = Intent(this, AlarmReciever::class.java).putExtra(KEY_NAME_ACCOUNT, nameAccount )
+
+        //creando una intención pendiente usando la intención
+        val pi = PendingIntent.getBroadcast(this, 0, i, PendingIntent.FLAG_CANCEL_CURRENT) // estab en 0
+
+        //configurar la alarma que se activará cuando expire el token
+//        am.setRepeating(AlarmManager.RTC, time, AlarmManager.INTERVAL_DAY, pi)
+        am.set(AlarmManager.RTC,time,pi)
+        Toast.makeText(this, "La alarma está configurada", Toast.LENGTH_SHORT).show()
+    }
+
+
+
+    private fun setListeners(){
+        binding.txtuserNameLogin.doOnTextChanged { text, _, _, _ ->
+            if (TextUtils.isEmpty(text)) {
+                binding.layoutUserNameLogin.error = "El usuario no puede estar vacío."
+            } else {
+                binding.layoutUserNameLogin.error = null
+            }
+        }
+        binding.txtpasswordLogin.doOnTextChanged { text, _, _, _ ->
+            if (TextUtils.isEmpty(text)) {
+                binding.layoutPasswordLogin.error = "La contraseña no puede estar en vacía."
+            } else {
+                binding.layoutPasswordLogin.error = null
+            }
+        }
+
+        binding.btnLogin.setOnClickListener {
+
+            val user = binding.txtuserNameLogin.text.toString()
+            val pass = binding.txtpasswordLogin.text.toString()
+
+            when  {
+                TextUtils.isEmpty(user) -> {
+                    binding.layoutUserNameLogin.error = "El usuario no puede estar vacío."
+                    binding.txtuserNameLogin.requestFocus()
+                    return@setOnClickListener
+                }
+                TextUtils.isEmpty(pass) -> {
+                    binding.layoutPasswordLogin.error = "La contraseña no puede estar en vacía."
+                    binding.txtpasswordLogin.requestFocus()
+                    return@setOnClickListener
+                }
+            }
+
+            finishLogin(user, pass)
+        }
+    }
+
+}
