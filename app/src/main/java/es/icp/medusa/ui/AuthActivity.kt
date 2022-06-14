@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.text.TextUtils
 import android.util.Base64
+import android.util.Log
 import android.widget.Toast
 import androidx.core.widget.doOnTextChanged
 import com.google.gson.Gson
@@ -18,6 +19,7 @@ import es.icp.icp_commons.Extensions.texto
 import es.icp.icp_commons.Helpers.PasswordStorageHelper
 import es.icp.medusa.authenticator.*
 import es.icp.medusa.databinding.ActivityAuthBinding
+import es.icp.medusa.modelo.TokenRequest
 import es.icp.medusa.modelo.TokenResponse
 import es.icp.medusa.repo.WebServiceLogin
 import es.icp.medusa.repo.interfaces.RepoResponse
@@ -65,11 +67,11 @@ class AuthActivity : AppCompatActivity() {
     private fun finishLogin(user: String, pass: String) {
 
         val passB64 = Base64.encodeToString(pass.toByteArray(), Base64.NO_WRAP)
+        val request = TokenRequest(user, passB64)
 
         WebServiceLogin.doLogin(
             context,
-            user,
-            passB64,
+            request,
             object: RepoResponse {
                 override fun respuesta(response: Any) {
                     if (response is TokenResponse) {
@@ -79,6 +81,8 @@ class AuthActivity : AppCompatActivity() {
                         //Creamos la cuenta y el bundle de datos de usario(contendra el response)
                         val account = Account(user, MY_ACCOUNT_TYPE)
                         val userData = Bundle()
+                        //configuramos el tiempo de caducidad del token
+                        setAlarm(response.dateExpire.time)
                         //añadimos el response en json al bundle
                         userData.putString(KEY_USERDATA_TOKEN, Gson().toJson(response))
                         // borramos la cuenta si ya existe
@@ -88,15 +92,7 @@ class AuthActivity : AppCompatActivity() {
                         // le metemos el token a la cuenta
                         am.setAuthToken(account, MY_AUTH_TOKEN_TYPE, response.accessToken)
 
-
                         PasswordStorageHelper(context).setData("userName", user.toByteArray())
-
-                        val date = Date()
-                        val expira = date.addSeconds(20)
-
-                        setAlarm(expira.time)
-
-
                         // creamos bundle de respuesta con la cuenta loggeada
                         val bundle = Bundle().apply {
                             putParcelable(KEY_BUNDLE_ACCOUNT, account)

@@ -8,6 +8,7 @@ import com.android.volley.VolleyError
 import es.icp.icp_commons.CheckRequest
 import es.icp.icp_commons.Interfaces.NewVolleyCallBack
 import es.icp.icp_commons.Objects.ParametrosPeticion
+import es.icp.medusa.modelo.TokenRequest
 import es.icp.medusa.modelo.TokenResponse
 import es.icp.medusa.repo.interfaces.RepoResponse
 import es.icp.medusa.repo.interfaces.Ws_Callback
@@ -15,17 +16,15 @@ import org.json.JSONObject
 
 object WebServiceLogin {
 
-
-
-    fun doLogin(context: Context, user: String, pass: String, repoResponse: RepoResponse){
-        val url = "https://ticketingicp-int.icp.es:9013/Fac/Login?u=$user&p=$pass"
+    fun doLogin(context: Context, request: TokenRequest, repoResponse: RepoResponse){
+        val url = "https://perseo-login-int.icp.es/icpsec/Fac/Login"
 
         procesarRequest(
             context,
-            JSONObject(),
+            request.toJson(),
             url,
             true,
-            Request.Method.GET,
+            Request.Method.POST,
             TokenResponse(),
             object : Ws_Callback {
                 override fun online(response: Any) {
@@ -64,11 +63,8 @@ object WebServiceLogin {
         } else {
             parametros.setMethod(ParametrosPeticion.Method.GET)
         }
-
         parametros.jsonObject = request
-
         Log.w("myapp URL",url)
-//
 
         try {
             CheckRequest.CheckAndSend(context, parametros, object : NewVolleyCallBack {
@@ -91,9 +87,8 @@ object WebServiceLogin {
 
                 override fun onError(error: VolleyError?) {
 //                    Toast.makeText(context, "Se ha producido un error de autentificacion, revise los datos introducidos.", Toast.LENGTH_SHORT).show()
-                    callback.online(TokenResponse("TOKEN MANUAL", 36000))
+                    callback.online(TokenResponse("TOKEN MANUAL", 600))
                     if (error?.networkResponse?.statusCode == 404){
-                        Log.d("entro?", "has entrado")
                         Toast.makeText(context, "USUARIO O CONTRASEÑA INCORRECTOS", Toast.LENGTH_LONG).show()
                     }
                     error?.let {
@@ -114,7 +109,6 @@ object WebServiceLogin {
             }, loader, /*"ID_USUARIO"*/1, "", guardarAccion)
         } catch (ex: Exception) {
             ex.printStackTrace()
-            Log.w("myapp en webse", "da error")
         }
     }
 }
