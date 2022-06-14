@@ -6,16 +6,16 @@ import java.util.*
 
 data class TokenResponse(
 
-    @SerializedName("accessToken")
+    @SerializedName("access_token")
     var accessToken: String = "",
 
-    @SerializedName("expiresIn")
+    @SerializedName("expires_in")
     var expiresIn : Int = 0,
 
     @SerializedName("message")
     var message: String = "",
 
-    @SerializedName("refreshToken")
+    @SerializedName("refresh_token")
     var refreshToken : String = "",
 
     @SerializedName("scope")
@@ -24,7 +24,7 @@ data class TokenResponse(
     @SerializedName("status")
     var status: String = "",
 
-    @SerializedName("tokenType")
+    @SerializedName("token_type")
     val tokenType: String = "Bearer",
 
     var dateExpire: Date = Date()
