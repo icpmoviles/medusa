@@ -10,6 +10,7 @@ import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupActionBarWithNavController
 import es.icp.medusa.authenticator.KEY_BUNDLE_ACCOUNT
+import es.icp.medusa.authenticator.KEY_USERDATA_INFO
 import es.icp.medusa.authenticator.KEY_USERDATA_TOKEN
 import es.icp.pruebasmedusa.R
 import es.icp.pruebasmedusa.databinding.ActivityMainBinding
@@ -40,9 +41,12 @@ class MainActivity : AppCompatActivity() {
         setupActionBarWithNavController(navController)
 
         account = intent.getParcelableExtra(KEY_BUNDLE_ACCOUNT)!!
-        val dataUser = accountManager.getUserData(account, KEY_USERDATA_TOKEN)
+        val dataToken = accountManager.getUserData(account, KEY_USERDATA_TOKEN)
+        val dataUser = accountManager.getUserData(account, KEY_USERDATA_INFO)
         Log.w("mainActivity", "account -> $account")
-        Log.w("mainActivity", "data user -> $dataUser")
+        Log.w("dataToken", "data token -> $dataToken")
+        Log.w("dataToken", "data user -> $dataUser")
+
     }
 
     override fun onSupportNavigateUp(): Boolean {

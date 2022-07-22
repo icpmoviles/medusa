@@ -19,6 +19,7 @@
         <item name="boxStrokeColor">@color/black</item>
         <item name="boxStrokeErrorColor">#F80F0F</item>
         <item name="hintTextColor">@color/black</item>
+        <item name="endIconTint">@color/black</item>
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
     </style>
