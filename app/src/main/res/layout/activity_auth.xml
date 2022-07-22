@@ -30,7 +30,8 @@
             android:id="@+id/layoutUserNameLogin"
             style="@style/textInputLayout"
             android:hint="Usuario"
-            app:endIconMode="clear_text">
+            app:endIconMode="clear_text"
+            app:endIconTint="@color/primary">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/txtuserNameLogin"
@@ -44,7 +45,7 @@
             style="@style/textInputLayout"
             android:layout_marginTop="24dp"
             android:hint="Contraseña"
-            app:passwordToggleEnabled="true"
+            app:passwordToggleTint="@color/colorPrimary"
             app:endIconMode="password_toggle">
 
             <com.google.android.material.textfield.TextInputEditText

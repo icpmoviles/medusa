@@ -9,7 +9,8 @@ import java.util.*
 
 const val MY_ACCOUNT_TYPE = "es.icp"
 const val MY_AUTH_TOKEN_TYPE = "Bearer"
-const val KEY_USERDATA_TOKEN = "userData"
+const val KEY_USERDATA_TOKEN = "userDataToken"
+const val KEY_USERDATA_INFO = "userDataInfo"
 const val KEY_BUNDLE_ACCOUNT = "account"
 const val KEY_NAME_ACCOUNT = "nameAccount"
 

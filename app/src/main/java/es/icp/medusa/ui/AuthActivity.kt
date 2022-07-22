@@ -6,6 +6,7 @@ import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.text.TextUtils
@@ -21,6 +22,7 @@ import es.icp.medusa.authenticator.*
 import es.icp.medusa.databinding.ActivityAuthBinding
 import es.icp.medusa.modelo.TokenRequest
 import es.icp.medusa.modelo.TokenResponse
+import es.icp.medusa.modelo.Usuario
 import es.icp.medusa.repo.WebServiceLogin
 import es.icp.medusa.repo.interfaces.RepoResponse
 import java.util.*
@@ -32,6 +34,7 @@ class AuthActivity : AppCompatActivity() {
     private lateinit var context: Context
     private lateinit var am : AccountManager
     private var nameAccount: String = ""
+    private var account: Account? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -75,24 +78,48 @@ class AuthActivity : AppCompatActivity() {
             object: RepoResponse {
                 override fun respuesta(response: Any) {
                     if (response is TokenResponse) {
+                        callGetUserData(response, user, pass)
+                    } else {
+                        Toast.makeText(context, "Usuario o contraseña incorrectos", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+        )
+    }
+
+    private fun callGetUserData(tokenResponse: TokenResponse, user: String, pass: String) {
+        WebServiceLogin.getUserData(
+            context,
+            tokenResponse.accessToken,
+            object : RepoResponse{
+                override fun respuesta(response: Any) {
+                    Log.w("respuesta USUARIO", response.toString())
+                    if (response is Usuario){
+                        Log.w("respuesta USUARIO", response.toString())
+
                         // login correcto -> creacion de cuenta
                         // aplicamos a la respuesta el tiempo de expiracion
-                        response.dateExpire = Date().addSeconds(response.expiresIn)
+                        tokenResponse.dateExpire = Date().addSeconds(tokenResponse.expiresIn)
                         //Creamos la cuenta y el bundle de datos de usario(contendra el response)
                         val account = Account(user, MY_ACCOUNT_TYPE)
                         val userData = Bundle()
                         //configuramos el tiempo de caducidad del token
-                        setAlarm(response.dateExpire.time)
+                        setAlarm(tokenResponse.dateExpire.time)
                         //añadimos el response en json al bundle
-                        userData.putString(KEY_USERDATA_TOKEN, Gson().toJson(response))
+                        userData.putString(KEY_USERDATA_TOKEN, Gson().toJson(tokenResponse))
+
+                        userData.putString(KEY_USERDATA_INFO, Gson().toJson(response))
                         // borramos la cuenta si ya existe
                         am.removeAccountExplicitly(account)
                         // creamos la cuenta
                         am.addAccountExplicitly(account, pass, userData)
                         // le metemos el token a la cuenta
-                        am.setAuthToken(account, MY_AUTH_TOKEN_TYPE, response.accessToken)
+                        am.setAuthToken(account, MY_AUTH_TOKEN_TYPE, tokenResponse.accessToken)
 
                         PasswordStorageHelper(context).setData("userName", user.toByteArray())
+
+
+
                         // creamos bundle de respuesta con la cuenta loggeada
                         val bundle = Bundle().apply {
                             putParcelable(KEY_BUNDLE_ACCOUNT, account)
@@ -106,8 +133,6 @@ class AuthActivity : AppCompatActivity() {
                         //satisfactorio el login, ya se controla esto a la vuelta
                         setResult(RESULT_OK, intent)
                         finish()
-                    } else {
-                        Toast.makeText(context, "Usuario o contraseña incorrectos", Toast.LENGTH_SHORT).show()
                     }
                 }
             }
@@ -122,11 +147,19 @@ class AuthActivity : AppCompatActivity() {
         val i = Intent(this, AlarmReciever::class.java).putExtra(KEY_NAME_ACCOUNT, nameAccount )
 
         //creando una intención pendiente usando la intención
-        val pi = PendingIntent.getBroadcast(this, 0, i, PendingIntent.FLAG_CANCEL_CURRENT) // estab en 0
+        //configurar la alarma que se activará cuando expire el token
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+            val pi = PendingIntent.getBroadcast(this, 0, i, PendingIntent.FLAG_CANCEL_CURRENT) // estab en 0
+            am.set(AlarmManager.RTC,time,pi)
+        }
+        else {
+            val pi = PendingIntent.getBroadcast(this, 0, i, PendingIntent.FLAG_MUTABLE)
+            am.set(AlarmManager.RTC,time,pi)
+        }
 
         //configurar la alarma que se activará cuando expire el token
 //        am.setRepeating(AlarmManager.RTC, time, AlarmManager.INTERVAL_DAY, pi)
-        am.set(AlarmManager.RTC,time,pi)
+
         Toast.makeText(this, "La alarma está configurada", Toast.LENGTH_SHORT).show()
     }
 
