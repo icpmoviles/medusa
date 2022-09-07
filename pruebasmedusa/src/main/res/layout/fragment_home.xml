@@ -21,4 +21,11 @@
         android:text="Log out"
         android:textAllCaps="false"/>
 
+    <Button
+        android:id="@+id/btn_is_Token_Valid"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Es Valido"
+        android:textAllCaps="false"/>
+
 </LinearLayout>
