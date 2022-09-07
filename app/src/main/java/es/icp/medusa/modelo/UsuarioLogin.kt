@@ -5,7 +5,7 @@ import es.icp.medusa.modelo.comunes.BaseObject
 import java.io.Serializable
 import java.util.*
 
-data class Usuario(
+data class UsuarioLogin(
     @SerializedName("idUsuario")
     var idUsuario: Int = 0,
     @SerializedName("usuario")
@@ -27,9 +27,9 @@ data class Usuario(
     @SerializedName("email")
     var email: String = "",
     @SerializedName("fAlta")
-    var fAlta: String = "",
+    var fAlta: Date? = null,
     @SerializedName("fBaja")
-    var fBaja: Date = Date(),
+    var fBaja: Date? = null,
     @SerializedName("idPerfil")
     var idPerfil: Int = 0
 

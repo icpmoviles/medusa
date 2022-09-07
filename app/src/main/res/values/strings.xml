@@ -1,4 +1,7 @@
 <resources>
     <string name="app_name">Medusa</string>
     <string name="name_account">ICP Perseo</string>
+    <string name="usuario">Usuario</string>
+    <string name="contrasena">Contraseña</string>
+    <string name="designed_by">Designed by</string>
 </resources>

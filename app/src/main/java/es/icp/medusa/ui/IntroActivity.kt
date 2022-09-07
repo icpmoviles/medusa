@@ -38,16 +38,17 @@ class IntroActivity : AppCompatActivity() {
 
         am = AccountManager.get(context)
         val accounts = am.getMyAccounts()
-
+        //aqui comprobamos si existen cuentas
         if (accounts.isNullOrEmpty()){
             Log.w("splash activity", "no hay cuentas")
+            //no hay cuentas, nos vamos a auth sin nombre de cuenta
             authIntent("")
         } else {
             when (accounts.size){
                 1 -> {
                     Log.w("splash activity", "hay una cuenta")
                     account = accounts[0]
-                    if (am.isAccessGranted(account))
+                    if (am.isValidToken(account))
                         goToHomeActivity(account)
                     else
                         authIntent(account.name)
@@ -104,7 +105,7 @@ class IntroActivity : AppCompatActivity() {
             }
             .setPositiveButton("ACEPTAR") { _, _ ->
                 account = am.getAccountByName(items[eleccion])!!
-                if (am.isAccessGranted(account))
+                if (am.isValidToken(account))
                     goToHomeActivity(account)
                 else
                     authIntent(account.name)

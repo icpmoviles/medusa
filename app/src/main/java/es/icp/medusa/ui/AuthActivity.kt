@@ -12,7 +12,7 @@ import android.os.Bundle
 import android.text.TextUtils
 import android.util.Base64
 import android.util.Log
-import android.widget.Toast
+import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import androidx.core.widget.doOnTextChanged
 import com.google.gson.Gson
 import es.icp.icp_commons.Extensions.addSeconds
@@ -22,7 +22,7 @@ import es.icp.medusa.authenticator.*
 import es.icp.medusa.databinding.ActivityAuthBinding
 import es.icp.medusa.modelo.TokenRequest
 import es.icp.medusa.modelo.TokenResponse
-import es.icp.medusa.modelo.Usuario
+import es.icp.medusa.modelo.UsuarioLogin
 import es.icp.medusa.repo.WebServiceLogin
 import es.icp.medusa.repo.interfaces.RepoResponse
 import java.util.*
@@ -55,16 +55,6 @@ class AuthActivity : AppCompatActivity() {
         }
 
 
-
-//        binding.btnLogin.setOnClickListener {
-////            val launch = packageManager.getLaunchIntentForPackage("es.icp.perseo_kt")
-////
-//            val intent = Intent(Intent.ACTION_MAIN)
-//            intent.setClassName(packageName, "$packageName.ui.mainview.MainActivity")
-//            intent.putExtra("extra", "aqui mandamos la cuenta si se autentifico")
-//            startActivity(intent)
-//            finish()
-//        }
     }
 
     private fun finishLogin(user: String, pass: String) {
@@ -77,25 +67,22 @@ class AuthActivity : AppCompatActivity() {
             request,
             object: RepoResponse {
                 override fun respuesta(response: Any) {
-                    if (response is TokenResponse) {
+                    if (response is TokenResponse)
                         callGetUserData(response, user, pass)
-                    } else {
-                        Toast.makeText(context, "Usuario o contraseña incorrectos", Toast.LENGTH_SHORT).show()
-                    }
                 }
             }
         )
     }
 
     private fun callGetUserData(tokenResponse: TokenResponse, user: String, pass: String) {
-        WebServiceLogin.getUserData(
+        WebServiceLogin.getUserDataFromServer(
             context,
             tokenResponse.accessToken,
             object : RepoResponse{
                 override fun respuesta(response: Any) {
                     Log.w("respuesta USUARIO", response.toString())
-                    if (response is Usuario){
-                        Log.w("respuesta USUARIO", response.toString())
+                    if (response is UsuarioLogin){
+//                        Log.w("respuesta USUARIO", response.toString())
 
                         // login correcto -> creacion de cuenta
                         // aplicamos a la respuesta el tiempo de expiracion
@@ -160,31 +147,29 @@ class AuthActivity : AppCompatActivity() {
         //configurar la alarma que se activará cuando expire el token
 //        am.setRepeating(AlarmManager.RTC, time, AlarmManager.INTERVAL_DAY, pi)
 
-        Toast.makeText(this, "La alarma está configurada", Toast.LENGTH_SHORT).show()
+//        Toast.makeText(this, "La alarma está configurada", Toast.LENGTH_SHORT).show()
     }
 
 
 
     private fun setListeners(){
         binding.txtuserNameLogin.doOnTextChanged { text, _, _, _ ->
-            if (TextUtils.isEmpty(text)) {
+            if (TextUtils.isEmpty(text))
                 binding.layoutUserNameLogin.error = "El usuario no puede estar vacío."
-            } else {
+            else
                 binding.layoutUserNameLogin.error = null
-            }
         }
         binding.txtpasswordLogin.doOnTextChanged { text, _, _, _ ->
-            if (TextUtils.isEmpty(text)) {
+            if (TextUtils.isEmpty(text))
                 binding.layoutPasswordLogin.error = "La contraseña no puede estar en vacía."
-            } else {
-                binding.layoutPasswordLogin.error = null
-            }
+            else
+                binding.layoutPasswordLogin.layoutParams.height = WRAP_CONTENT
         }
 
         binding.btnLogin.setOnClickListener {
 
-            val user = binding.txtuserNameLogin.text.toString()
-            val pass = binding.txtpasswordLogin.text.toString()
+            val user = binding.txtuserNameLogin.text.toString().trimEnd()
+            val pass = binding.txtpasswordLogin.text.toString().trimEnd()
 
             when  {
                 TextUtils.isEmpty(user) -> {

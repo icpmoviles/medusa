@@ -9,9 +9,7 @@ import android.util.Log
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupActionBarWithNavController
-import es.icp.medusa.authenticator.KEY_BUNDLE_ACCOUNT
-import es.icp.medusa.authenticator.KEY_USERDATA_INFO
-import es.icp.medusa.authenticator.KEY_USERDATA_TOKEN
+import es.icp.medusa.authenticator.*
 import es.icp.pruebasmedusa.R
 import es.icp.pruebasmedusa.databinding.ActivityMainBinding
 
@@ -41,11 +39,15 @@ class MainActivity : AppCompatActivity() {
         setupActionBarWithNavController(navController)
 
         account = intent.getParcelableExtra(KEY_BUNDLE_ACCOUNT)!!
+        val data = accountManager.getUserDataResponse(account)
+        val token = accountManager.getTokenResponse(account)
+
         val dataToken = accountManager.getUserData(account, KEY_USERDATA_TOKEN)
         val dataUser = accountManager.getUserData(account, KEY_USERDATA_INFO)
+
         Log.w("mainActivity", "account -> $account")
-        Log.w("dataToken", "data token -> $dataToken")
-        Log.w("dataToken", "data user -> $dataUser")
+        Log.w("dataToken", "data token -> $token")
+        Log.w("dataToken", "data user -> $data")
 
     }
 

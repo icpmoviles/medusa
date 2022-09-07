@@ -4,14 +4,17 @@ import android.accounts.Account
 import android.accounts.AccountManager
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
-import es.icp.medusa.authenticator.clearToken
+import com.google.gson.Gson
+import es.icp.medusa.authenticator.*
+import es.icp.medusa.modelo.TokenResponse
+import es.icp.medusa.repo.WebServiceLogin
 import es.icp.medusa.ui.IntroActivity
-import es.icp.pruebasmedusa.R
 import es.icp.pruebasmedusa.databinding.FragmentHomeBinding
 import es.icp.pruebasmedusa.ui.mainview.MainActivity
 
@@ -23,6 +26,7 @@ class HomeFragment : Fragment() {
     private val binding get() = _binding!!
     private lateinit var currentAccount: Account
     private lateinit var am: AccountManager
+    private lateinit var tokenResponse: TokenResponse
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -44,13 +48,37 @@ class HomeFragment : Fragment() {
         currentAccount = (activity as? MainActivity)?.account!!
         binding.txt.text = currentAccount.toString()
 
+
+        tokenResponse =
+            Gson().fromJson(am.getUserData(currentAccount, KEY_USERDATA_TOKEN), TokenResponse::class.java)
+
+
+
         binding.btnLogOut.setOnClickListener{ logOut() }
+        binding.btnIsTokenValid.setOnClickListener {
+            val valido = am.isValidToken(currentAccount)
+            if (valido)
+                Log.w("HOME FRAGMENT isvalid", valido.toString())
+            else
+                Log.w("HOME FRAGMENT isNOTvalid", valido.toString())
+
+        }
     }
 
     fun logOut() {
 
-        am.clearToken(currentAccount)
-        requireActivity().finish()
-        startActivity(Intent(requireContext(), IntroActivity::class.java))
+
+
+        WebServiceLogin.invalidateToken(
+            requireContext(),
+            tokenResponse.accessToken
+        ){
+            am.clearToken(currentAccount)
+            if (it) {
+            }
+            Log.w("SALIENDO LOGIN", it.toString())
+        }
+//        requireActivity().finish()
+//        startActivity(Intent(requireContext(), IntroActivity::class.java))
     }
 }

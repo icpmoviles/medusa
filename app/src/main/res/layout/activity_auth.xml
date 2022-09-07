@@ -12,7 +12,7 @@
         android:id="@+id/imgLogo"
         android:layout_width="match_parent"
         android:layout_height="100dp"
-        android:src="@drawable/ic_vector"
+        android:src="@drawable/ic_perseo_logo"
         android:layout_weight="1"
         android:layout_marginStart="25dp"
         android:layout_marginEnd="25dp"/>
@@ -29,29 +29,32 @@
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/layoutUserNameLogin"
             style="@style/textInputLayout"
-            android:hint="Usuario"
+            android:hint="@string/usuario"
+            app:errorEnabled="true"
             app:endIconMode="clear_text"
             app:endIconTint="@color/primary">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/txtuserNameLogin"
                 style="@style/textInputEditText"
-                android:inputType="text" />
+                android:inputType="text"
+                android:imeOptions="actionNext"/>
         </com.google.android.material.textfield.TextInputLayout>
 
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/layoutPasswordLogin"
             style="@style/textInputLayout"
-            android:layout_marginTop="24dp"
-            android:hint="Contraseña"
+            android:hint="@string/contrasena"
+            app:errorEnabled="true"
             app:passwordToggleTint="@color/colorPrimary"
             app:endIconMode="password_toggle">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/txtpasswordLogin"
                 style="@style/textInputEditText"
-                android:inputType="textPassword" />
+                android:inputType="textPassword"
+                android:imeOptions="actionGo"/>
         </com.google.android.material.textfield.TextInputLayout>
 
 
