@@ -61,41 +61,42 @@ fun AccountManager.getUserDataResponse(account: Account): UsuarioLogin {
     return Gson().fromJson(userData, UsuarioLogin::class.java)
 }
 
-fun AccountManager.isValidToken(account: Account): Boolean{
+fun AccountManager.isAccountTokenValid(account: Account): Boolean{
     val token : String? = this.getToken(account)
     Log.w("acoount", token.toString())
     token?.let {
         return true
-    }
+    } ?: kotlin.run { return false }
 
-//    if (!token.isNullOrEmpty()) {
-//        try {
-//            val tokenResponse = getTokenResponse(account)
-//            if (isTokenInTime(tokenResponse.dateExpire))
-//                return true
-//        } catch (ex: Exception){
-//            return false
-//        }
-//
-//    }
-    return false
 }
 
 fun AccountManager.getToken(account: Account) : String? =
     this.peekAuthToken(account, MY_AUTH_TOKEN_TYPE)
 
-
 fun AccountManager.clearToken(account: Account) =
     this.invalidateAuthToken(MY_ACCOUNT_TYPE, this.peekAuthToken(account, MY_AUTH_TOKEN_TYPE))
 
-fun isTokenValid(context: Context, token: String, resultado: (Boolean) -> Unit) {
 
-    WebServiceLogin.isTokenValid(
-        context,
-        token
-    ) {
-        Log.w("istokenvalid", it.toString())
-        resultado.invoke(it)
+fun AccountManager.getRefreshToken(account: Account) : String {
+    val userDataString = this.getUserData(account, KEY_USERDATA_TOKEN)
+    val userData =  Gson().fromJson(userDataString, TokenResponse::class.java)
+    return userData.refreshToken
+}
+
+fun AccountManager.isTokenValidFromServer(context: Context, account: Account, resultado: (Boolean) -> Unit) {
+
+    this.getToken(account)?.let { token->
+        WebServiceLogin.isTokenValid(
+            context,
+            token,
+            this.getRefreshToken(account)
+        ) { resultado.invoke(it) }
+    }?: kotlin.run {
+        this.invalidateAuthToken(MY_AUTH_TOKEN_TYPE, this.getToken(account))
+        resultado.invoke(false)
     }
+}
+
+fun AccountManager.refreshToken(){
 
 }
