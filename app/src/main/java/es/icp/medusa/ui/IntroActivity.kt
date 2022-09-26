@@ -48,10 +48,15 @@ class IntroActivity : AppCompatActivity() {
                 1 -> {
                     Log.w("splash activity", "hay una cuenta")
                     account = accounts[0]
-                    if (am.isValidToken(account))
-                        goToHomeActivity(account)
-                    else
-                        authIntent(account.name)
+                    am.isTokenValidFromServer(
+                        context,
+                        account
+                    ) {
+                        if (it)
+                            goToHomeActivity(account)
+                        else
+                            authIntent(account.name)
+                    }
                 }
                 else -> choiceAccountDialog()
             }
@@ -105,10 +110,16 @@ class IntroActivity : AppCompatActivity() {
             }
             .setPositiveButton("ACEPTAR") { _, _ ->
                 account = am.getAccountByName(items[eleccion])!!
-                if (am.isValidToken(account))
-                    goToHomeActivity(account)
-                else
-                    authIntent(account.name)
+                am.isTokenValidFromServer(
+                    context,
+                    account
+                ) {
+                    if (it)
+                        goToHomeActivity(account)
+                    else
+                        authIntent(account.name)
+                }
+
             }
             .show()
     }

@@ -1,6 +1,7 @@
 package es.icp.medusa.repo
 
 import android.content.Context
+import android.util.Base64
 import android.util.Log
 import android.widget.Toast
 import com.android.volley.Request
@@ -10,6 +11,7 @@ import com.android.volley.Response
 import com.android.volley.VolleyError
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
+import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import es.icp.icp_commons.CheckRequest
 import es.icp.icp_commons.Interfaces.NewVolleyCallBack
@@ -24,6 +26,7 @@ import es.icp.medusa.utils.Constantes.BASE_URL
 import es.icp.medusa.utils.Constantes.ENDPOINT_ISTOKENVALID
 import es.icp.medusa.utils.Constantes.ENDPOINT_LOGIN
 import es.icp.medusa.utils.Constantes.ENDPOINT_LOGOUT
+import es.icp.medusa.utils.Constantes.ENDPOINT_REFRESH_TOKEN
 import es.icp.medusa.utils.Constantes.ENDPOINT_USERS
 import es.icp.medusa.utils.Dx
 import org.json.JSONObject
@@ -82,7 +85,7 @@ object WebServiceLogin {
 
     }
 
-    fun isTokenValid(context: Context, token: String, respuesta: (Boolean)-> Unit){
+    fun isTokenValid(context: Context, token: String, ipcrt: String, respuesta: (Boolean)-> Unit){
 
         val url = BASE_URL + ENDPOINT_ISTOKENVALID
 
@@ -93,15 +96,15 @@ object WebServiceLogin {
             url,
             Response.Listener{ respuesta.invoke(it.toBoolean()) },
             Response.ErrorListener { error ->
-                if (error.networkResponse.statusCode == 401)
-                    respuesta.invoke(false)
+                respuesta.invoke(false)
                 error.printStackTrace()
             }
         ) {
             override fun getHeaders(): MutableMap<String, String> {
                 return mutableMapOf(
                     "ih" to "H4sIAAAAAAACCqpW8kxxLChQsjLXAbKccxIzc0MqC1KLlazySnNyagEAAAD//w==",
-                    "Authorization" to "Bearer $token"
+                    "Authorization" to "Bearer $token",
+                    "icprt" to ipcrt
                 )
             }
         }
@@ -127,6 +130,35 @@ object WebServiceLogin {
                 return mutableMapOf(
                     "ih" to "H4sIAAAAAAACCqpW8kxxLChQsjLXAbKccxIzc0MqC1KLlazySnNyagEAAAD//w==",
                     "Authorization" to "Bearer $token"
+                )
+            }
+        }
+
+        requestQueue.add(stringRequest)
+    }
+
+    fun refreshToken(context: Context,token: String, rfToken: String, respuesta: (TokenResponse?) -> Unit){
+        val url = BASE_URL + ENDPOINT_REFRESH_TOKEN
+
+        val requestQueue = Volley.newRequestQueue(context)
+
+        val stringRequest = object : StringRequest(
+            GET,
+            url,
+            Response.Listener {
+                val response = Gson().fromJson(it, TokenResponse::class.java)
+                respuesta.invoke(response)
+                             },
+            Response.ErrorListener { error ->
+                respuesta.invoke(null)
+                error.printStackTrace()
+            }
+        ) {
+            override fun getHeaders(): MutableMap<String, String> {
+                return mutableMapOf(
+                    "ih" to "H4sIAAAAAAACCqpW8kxxLChQsjLXAbKccxIzc0MqC1KLlazySnNyagEAAAD//w==",
+                    "Authorization" to "Bearer $token",
+                    "icprt" to Base64.encodeToString(rfToken.toByteArray(), Base64.DEFAULT)
                 )
             }
         }
@@ -224,7 +256,7 @@ object WebServiceLogin {
                 override fun onError(error: VolleyError?) {
                     when (error?.networkResponse?.statusCode){
                         401 -> Dx.dxWebServiceError(context, "Error", error.message ?: "No autorizado"){}
-                        else -> Dx.dxWebServiceError(context, "Error", error?.message?: "Se ha producido un error de comunicación con el serivor."){}
+                        else -> Dx.dxWebServiceError(context, "Error", error?.message?: "Se ha producido un error de comunicación con el servidor."){}
                     }
 
                 }
