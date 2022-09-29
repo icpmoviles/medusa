@@ -91,7 +91,7 @@ class AuthActivity : AppCompatActivity() {
                         val account = Account(user, MY_ACCOUNT_TYPE)
                         val userData = Bundle()
                         //configuramos el tiempo de caducidad del token
-                        setAlarm(tokenResponse.dateExpire.time - 100)
+                        setAlarm((tokenResponse.expiresIn - 100).toLong())
                         //añadimos el response en json al bundle
                         userData.putString(KEY_USERDATA_TOKEN, Gson().toJson(tokenResponse))
 
