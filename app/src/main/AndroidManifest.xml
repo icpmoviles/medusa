@@ -15,10 +15,14 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.RECORD_AUDIO"/>
 
-    <application>
+    <application
+        android:usesCleartextTraffic="true">
         <activity
             android:name=".ui.IntroActivity"
-            android:exported="true" >
+            android:exported="true"
+            android:clearTaskOnLaunch="true"
+            android:launchMode="singleInstance"
+            >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -27,7 +31,8 @@
         </activity>
         <activity
             android:name=".ui.AuthActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:launchMode="singleInstance"/>
 
         <receiver
             android:name="es.icp.medusa.authenticator.AlarmReciever"
