@@ -118,3 +118,6 @@ fun AccountManager.refreshToken(context: Context, account: Account) : Boolean{
 
 fun AccountManager.removeTokenAccount(account: Account) =
     this.invalidateAuthToken(MY_AUTH_TOKEN_TYPE, this.getToken(account))
+
+fun AccountManager.getTimeExpire(account: Account) : Int =
+    this.getTokenResponse(account).expiresIn
