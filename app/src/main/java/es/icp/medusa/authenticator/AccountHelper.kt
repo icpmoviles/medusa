@@ -96,7 +96,7 @@ fun AccountManager.isTokenValidFromServer(context: Context, account: Account, re
 }
 
 
-fun AccountManager.refreshToken(context: Context, account: Account){
+fun AccountManager.refreshToken(context: Context, account: Account) : Boolean{
     val currentToken = this.getToken(account)
     currentToken?.let {
         WebServiceLogin.refreshToken(
@@ -112,7 +112,8 @@ fun AccountManager.refreshToken(context: Context, account: Account){
             val newToken = Gson().fromJson(response, TokenResponse::class.java).accessToken
             this.setAuthToken(account, MY_AUTH_TOKEN_TYPE, newToken)
         }
-    }
+        return true
+    }?: kotlin.run { return false }
 }
 
 fun AccountManager.removeTokenAccount(account: Account) =

@@ -91,7 +91,7 @@ class AuthActivity : AppCompatActivity() {
                         val account = Account(user, MY_ACCOUNT_TYPE)
                         val userData = Bundle()
                         //configuramos el tiempo de caducidad del token
-                        setAlarm(tokenResponse.dateExpire.time)
+                        setAlarm(tokenResponse.dateExpire.time - 100)
                         //añadimos el response en json al bundle
                         userData.putString(KEY_USERDATA_TOKEN, Gson().toJson(tokenResponse))
 
@@ -163,7 +163,7 @@ class AuthActivity : AppCompatActivity() {
             if (TextUtils.isEmpty(text))
                 binding.layoutPasswordLogin.error = "La contraseña no puede estar en vacía."
             else
-                binding.layoutPasswordLogin.layoutParams.height = WRAP_CONTENT
+                binding.layoutPasswordLogin.error = null
         }
 
         binding.btnLogin.setOnClickListener {
