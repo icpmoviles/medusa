@@ -50,7 +50,7 @@ class AlarmReciever: BroadcastReceiver() {
                         )
                         Log.w("suces", successfull.toString())
                         if (successfull)
-                            setAlarm(context, 50)
+                            setAlarm(context, (am.getTimeExpire(it).toLong() - 100))
                         else {
                             notifyNotification(context, name)
 //                            Log.w("no suces", "refresh fail")
