@@ -52,10 +52,8 @@ class IntroActivity : AppCompatActivity() {
                         context,
                         account
                     ) {
-                        if (it)
-                            goToHomeActivity(account)
-                        else
-                            authIntent(account.name)
+                        if (it) goToHomeActivity(account)
+                        else authIntent(account.name)
                     }
                 }
                 else -> choiceAccountDialog()

@@ -61,10 +61,23 @@ class HomeFragment : Fragment() {
                 Log.w("HOME FRAGMENT isNOTvalid", valido.toString())
 
         }
+        binding.btnRefreshToken.setOnClickListener{
+            am.refreshToken(
+                requireContext(),
+                currentAccount
+            )
+
+        }
+
+        binding.btnInfo.setOnClickListener {
+            Log.w("token::", am.getTokenResponse(currentAccount).toString())
+            Log.w("user:::", am.getUserDataResponse(currentAccount).toString())
+        }
     }
 
     fun logOut() {
 
+        am.removeTokenAccount(currentAccount)
 
 
         WebServiceLogin.invalidateToken(
