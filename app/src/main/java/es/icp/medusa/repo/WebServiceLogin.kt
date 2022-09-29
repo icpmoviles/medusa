@@ -85,7 +85,7 @@ object WebServiceLogin {
 
     }
 
-    fun isTokenValid(context: Context, token: String, ipcrt: String, respuesta: (Boolean)-> Unit){
+    fun isTokenValid(context: Context, token: String, respuesta: (Boolean)-> Unit){
 
         val url = BASE_URL + ENDPOINT_ISTOKENVALID
 
@@ -103,8 +103,7 @@ object WebServiceLogin {
             override fun getHeaders(): MutableMap<String, String> {
                 return mutableMapOf(
                     "ih" to "H4sIAAAAAAACCqpW8kxxLChQsjLXAbKccxIzc0MqC1KLlazySnNyagEAAAD//w==",
-                    "Authorization" to "Bearer $token",
-                    "icprt" to ipcrt
+                    "Authorization" to "Bearer $token"
                 )
             }
         }
@@ -137,17 +136,16 @@ object WebServiceLogin {
         requestQueue.add(stringRequest)
     }
 
-    fun refreshToken(context: Context,token: String, rfToken: String, respuesta: (TokenResponse?) -> Unit){
+    fun refreshToken(context: Context,token: String, rfToken: String, respuesta: (String?) -> Unit){
         val url = BASE_URL + ENDPOINT_REFRESH_TOKEN
 
         val requestQueue = Volley.newRequestQueue(context)
 
         val stringRequest = object : StringRequest(
-            GET,
+            POST,
             url,
             Response.Listener {
-                val response = Gson().fromJson(it, TokenResponse::class.java)
-                respuesta.invoke(response)
+                respuesta.invoke(it)
                              },
             Response.ErrorListener { error ->
                 respuesta.invoke(null)
@@ -157,7 +155,12 @@ object WebServiceLogin {
             override fun getHeaders(): MutableMap<String, String> {
                 return mutableMapOf(
                     "ih" to "H4sIAAAAAAACCqpW8kxxLChQsjLXAbKccxIzc0MqC1KLlazySnNyagEAAAD//w==",
-                    "Authorization" to "Bearer $token",
+                    "Authorization" to "Bearer $token"
+                )
+            }
+
+            override fun getParams(): MutableMap<String, String>? {
+                return mutableMapOf(
                     "icprt" to Base64.encodeToString(rfToken.toByteArray(), Base64.DEFAULT)
                 )
             }

@@ -9,7 +9,6 @@ import com.google.gson.Gson
 import es.icp.medusa.modelo.TokenResponse
 import es.icp.medusa.modelo.UsuarioLogin
 import es.icp.medusa.repo.WebServiceLogin
-import es.icp.medusa.repo.interfaces.RepoResponse
 import java.util.*
 
 const val MY_ACCOUNT_TYPE = "es.icp"
@@ -88,8 +87,7 @@ fun AccountManager.isTokenValidFromServer(context: Context, account: Account, re
     this.getToken(account)?.let { token->
         WebServiceLogin.isTokenValid(
             context,
-            token,
-            this.getRefreshToken(account)
+            token
         ) { resultado.invoke(it) }
     }?: kotlin.run {
         this.invalidateAuthToken(MY_AUTH_TOKEN_TYPE, this.getToken(account))
@@ -97,6 +95,25 @@ fun AccountManager.isTokenValidFromServer(context: Context, account: Account, re
     }
 }
 
-fun AccountManager.refreshToken(){
 
+fun AccountManager.refreshToken(context: Context, account: Account){
+    val currentToken = this.getToken(account)
+    currentToken?.let {
+        WebServiceLogin.refreshToken(
+            context,
+            it,
+            this.getRefreshToken(account)
+        ){ response->
+            this.setUserData(
+                account,
+                KEY_USERDATA_TOKEN,
+                response
+            )
+            val newToken = Gson().fromJson(response, TokenResponse::class.java).accessToken
+            this.setAuthToken(account, MY_AUTH_TOKEN_TYPE, newToken)
+        }
+    }
 }
+
+fun AccountManager.removeTokenAccount(account: Account) =
+    this.invalidateAuthToken(MY_AUTH_TOKEN_TYPE, this.getToken(account))

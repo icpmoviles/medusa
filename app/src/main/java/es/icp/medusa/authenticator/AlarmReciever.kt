@@ -46,8 +46,8 @@ class AlarmReciever: BroadcastReceiver() {
                         token,
                         am.getRefreshToken(it)
                     ) { tokenResponse ->
-                        am.setAuthToken(account, MY_AUTH_TOKEN_TYPE, tokenResponse!!.accessToken)
-                        am.setUserData(account, KEY_USERDATA_TOKEN, Gson().toJson(tokenResponse) )
+//                        am.setAuthToken(account, MY_AUTH_TOKEN_TYPE, tokenResponse!!.accessToken)
+//                        am.setUserData(account, KEY_USERDATA_TOKEN, Gson().toJson(tokenResponse) )
 
                     }
                 }

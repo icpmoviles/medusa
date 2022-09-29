@@ -13,7 +13,7 @@ object Dx {
             .setMensaje("No dispones de conexión a internet.")
             .noPermitirSalirSinBotones()
             .setIcono(
-                ResourcesCompat.getDrawable(context.resources, R.drawable.ic_perseo_logo_casco, null)
+                ResourcesCompat.getDrawable(context.resources, R.drawable.ic_perseo_logo_casco, null), null
             )
             .showAceptarButton(
                 "Aceptar",
