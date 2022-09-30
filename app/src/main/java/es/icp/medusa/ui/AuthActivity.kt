@@ -7,24 +7,19 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.Build
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.text.TextUtils
 import android.util.Base64
 import android.util.Log
-import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.doOnTextChanged
 import com.google.gson.Gson
-import es.icp.icp_commons.Extensions.addSeconds
-import es.icp.icp_commons.Extensions.texto
-import es.icp.icp_commons.Helpers.PasswordStorageHelper
 import es.icp.medusa.authenticator.*
 import es.icp.medusa.databinding.ActivityAuthBinding
 import es.icp.medusa.modelo.TokenRequest
 import es.icp.medusa.modelo.TokenResponse
-import es.icp.medusa.modelo.UsuarioLogin
 import es.icp.medusa.repo.WebServiceLogin
-import es.icp.medusa.repo.interfaces.RepoResponse
 import java.util.*
 
 class AuthActivity : AppCompatActivity() {
@@ -64,67 +59,61 @@ class AuthActivity : AppCompatActivity() {
 
         WebServiceLogin.doLogin(
             context,
-            request,
-            object: RepoResponse {
-                override fun respuesta(response: Any) {
-                    if (response is TokenResponse)
-                        callGetUserData(response, user, pass)
-                }
+            request)
+        {
+            it?.let {
+                callGetUserData(it, user, pass)
+            }?: kotlin.run {
+                Toast.makeText(context, "Credenciales de acceso incorrectas.", Toast.LENGTH_LONG).show()
             }
-        )
+
+
+        }
+
     }
 
     private fun callGetUserData(tokenResponse: TokenResponse, user: String, pass: String) {
         WebServiceLogin.getUserDataFromServer(
             context,
-            tokenResponse.accessToken,
-            object : RepoResponse{
-                override fun respuesta(response: Any) {
-                    Log.w("respuesta USUARIO", response.toString())
-                    if (response is UsuarioLogin){
-//                        Log.w("respuesta USUARIO", response.toString())
+            tokenResponse.accessToken) {
+            it?.let {
+                // login correcto -> creacion de cuenta
+                // aplicamos a la respuesta el tiempo de expiracion
+                tokenResponse.dateExpire = Date().addSeconds( (tokenResponse.expiresIn - 100 ))
+                //Creamos la cuenta y el bundle de datos de usario(contendra el response)
+                val account = Account(user, MY_ACCOUNT_TYPE)
+                val userData = Bundle()
+                //configuramos el tiempo de caducidad del token
+                Log.w("alarm", "${tokenResponse.dateExpire}")
+                setAlarm(tokenResponse.dateExpire.time)
+                //añadimos el response en json al bundle
+                userData.putString(KEY_USERDATA_TOKEN, Gson().toJson(tokenResponse))
 
-                        // login correcto -> creacion de cuenta
-                        // aplicamos a la respuesta el tiempo de expiracion
-                        tokenResponse.dateExpire = Date().addSeconds( (tokenResponse.expiresIn - 100 ))
-                        //Creamos la cuenta y el bundle de datos de usario(contendra el response)
-                        val account = Account(user, MY_ACCOUNT_TYPE)
-                        val userData = Bundle()
-                        //configuramos el tiempo de caducidad del token
-                        Log.w("alarm", "${tokenResponse.dateExpire}")
-                        setAlarm(tokenResponse.dateExpire.time)
-                        //añadimos el response en json al bundle
-                        userData.putString(KEY_USERDATA_TOKEN, Gson().toJson(tokenResponse))
+                userData.putString(KEY_USERDATA_INFO, Gson().toJson(it))
+                // borramos la cuenta si ya existe
+                am.removeAccountExplicitly(account)
+                // creamos la cuenta
+                am.addAccountExplicitly(account, pass, userData)
+                // le metemos el token a la cuenta
+                am.setAuthToken(account, MY_AUTH_TOKEN_TYPE, tokenResponse.accessToken)
 
-                        userData.putString(KEY_USERDATA_INFO, Gson().toJson(response))
-                        // borramos la cuenta si ya existe
-                        am.removeAccountExplicitly(account)
-                        // creamos la cuenta
-                        am.addAccountExplicitly(account, pass, userData)
-                        // le metemos el token a la cuenta
-                        am.setAuthToken(account, MY_AUTH_TOKEN_TYPE, tokenResponse.accessToken)
+//                PasswordStorageHelper(context).setData("userName", user.toByteArray())
 
-                        PasswordStorageHelper(context).setData("userName", user.toByteArray())
-
-
-
-                        // creamos bundle de respuesta con la cuenta loggeada
-                        val bundle = Bundle().apply {
-                            putParcelable(KEY_BUNDLE_ACCOUNT, account)
-                        }
-                        // añadimos el bundle con la cuenta al intent
-                        val intent = Intent().also {
-                            it.putExtra(KEY_BUNDLE_ACCOUNT, bundle)
-                        }
-                        // mandamos el resultado de vuelta
-                        // no hace falta mandar resultado si no ha sido
-                        //satisfactorio el login, ya se controla esto a la vuelta
-                        setResult(RESULT_OK, intent)
-                        finish()
-                    }
+                // creamos bundle de respuesta con la cuenta loggeada
+                val bundle = Bundle().apply {
+                    putParcelable(KEY_BUNDLE_ACCOUNT, account)
                 }
-            }
-        )
+                // añadimos el bundle con la cuenta al intent
+                val intent = Intent().also {
+                    it.putExtra(KEY_BUNDLE_ACCOUNT, bundle)
+                }
+                // mandamos el resultado de vuelta
+                // no hace falta mandar resultado si no ha sido
+                //satisfactorio el login, ya se controla esto a la vuelta
+                setResult(RESULT_OK, intent)
+                finish()
+            }?: kotlin.run { Toast.makeText(context, "Se ha pruducido un error desconocido", Toast.LENGTH_LONG) }
+        }
     }
 
     private fun setAlarm(time: Long) {

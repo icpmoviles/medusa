@@ -4,10 +4,8 @@ import android.accounts.Account
 import android.accounts.AccountManager
 import android.content.Context
 import android.text.TextUtils
-import android.util.Log
+import com.google.android.material.textfield.TextInputEditText
 import com.google.gson.Gson
-import es.icp.icp_commons.Extensions.add
-import es.icp.icp_commons.Extensions.addSeconds
 import es.icp.medusa.modelo.TokenResponse
 import es.icp.medusa.modelo.UsuarioLogin
 import es.icp.medusa.repo.WebServiceLogin
@@ -141,6 +139,7 @@ fun AccountManager.refreshToken(context: Context, account: Account) : Boolean{
                 )
                 this.setAuthToken(account, MY_AUTH_TOKEN_TYPE, it.accessToken)
                 success = true
+                return@let
             }
         }
         return success
@@ -158,3 +157,23 @@ fun AccountManager.removeTokenAccount(account: Account) =
  */
 fun AccountManager.getTimeExpire(account: Account) : Date =
     this.getTokenResponse(account).dateExpire
+
+/**
+ * Add field date to current date
+ */
+fun Date.add(field: Int, amount: Int): Date {
+    Calendar.getInstance().apply {
+        time = this@add
+        add(field, amount)
+        return time
+    }
+}
+
+fun Date.addSeconds(seconds: Int): Date{
+    return add(Calendar.SECOND, seconds)
+}
+
+fun TextInputEditText.texto(texto: String){
+    this.text?.clear()
+    this.text?.append(texto)
+}
