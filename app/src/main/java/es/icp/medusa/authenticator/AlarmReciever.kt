@@ -1,5 +1,6 @@
 package es.icp.medusa.authenticator
 
+import android.accounts.Account
 import android.accounts.AccountManager
 import android.app.*
 import android.content.BroadcastReceiver
@@ -29,43 +30,38 @@ class AlarmReciever: BroadcastReceiver() {
         const val NOTIFICATION_ID = 100
         const val NOTIFICATION_CHANNEL_ID = "1000"
     }
-    var nameAccount : String? = null
+
 
     @RequiresApi(Build.VERSION_CODES.S)
     override fun onReceive(context: Context, intent: Intent) {
         val am = AccountManager.get(context)
-        nameAccount = intent.getStringExtra(KEY_NAME_ACCOUNT) ?: ""
-        nameAccount?.let { name ->
-            val account = am.getAccountByName(name)
-            createNotificationChannel(context)
-
+        val nameAccount = intent.getStringExtra(KEY_NAME_ACCOUNT) ?: ""
+        if (nameAccount.isNotBlank()){
+            val account : Account? = am.getAccountByName(nameAccount)
 
             if (appInForeground(context)) {
                 Log.w("::::", "APP EN PRIMER PLANO")
                 account?.let {
-                    am.getToken(it)?.let { token ->
-                        val successfull = am.refreshToken(
-                            context,
-                            it
-                        )
-                        Log.w("suces", successfull.toString())
-                        if (successfull)
-                            setAlarm(context, am.getTimeExpire(it).time)
-                        else {
-                            notifyNotification(context, name)
-//                            Log.w("no suces", "refresh fail")
-//                            context.startActivity(
-//                                Intent(context, IntroActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-//                            )
+                    am.refreshToken(context, it){ result ->
+                        if (result){
+                            setAlarm(context, am.getTimeExpire(it).time, nameAccount)
+                            Log.w("suces refresh", "token refrescado")
+                        } else {
+                            createNotificationChannel(context)
+                            notifyNotification(context, nameAccount)
                         }
-                    }?: kotlin.run { notifyNotification(context, name) }
+                    }
+                } ?: kotlin.run {
+                    createNotificationChannel(context)
+                    notifyNotification(context, nameAccount)
                 }
             }
             else {
                 account?.let {
                     am.clearToken(it)
                 }
-                notifyNotification(context, name)
+                createNotificationChannel(context)
+                notifyNotification(context, nameAccount)
 
             }
         }
@@ -104,7 +100,7 @@ class AlarmReciever: BroadcastReceiver() {
         return runningAppProcesses.any { it.processName == context.packageName && it.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND }
     }
 
-    fun setAlarm(context: Context, time: Long) {
+    fun setAlarm(context: Context, time: Long, nameAccount: String) {
         Log.w("setalarm", "configurada nueva alarma")
         //obteniendo el administrador de alarmas
         val am = context.getSystemService(AppCompatActivity.ALARM_SERVICE) as AlarmManager
