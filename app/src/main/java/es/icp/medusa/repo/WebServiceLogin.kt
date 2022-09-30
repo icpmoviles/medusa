@@ -94,7 +94,7 @@ object WebServiceLogin {
         val stringRequest = object : StringRequest(
             GET,
             url,
-            Response.Listener{ respuesta.invoke(it.toBoolean()) },
+            Response.Listener{ respuesta.invoke(true) },
             Response.ErrorListener { error ->
                 respuesta.invoke(false)
                 error.printStackTrace()
@@ -136,7 +136,7 @@ object WebServiceLogin {
         requestQueue.add(stringRequest)
     }
 
-    fun refreshToken(context: Context,token: String, rfToken: String, respuesta: (String?) -> Unit){
+    fun refreshToken(context: Context,token: String, rfToken: String, respuesta: (TokenResponse?) -> Unit){
         val url = BASE_URL + ENDPOINT_REFRESH_TOKEN
 
         val requestQueue = Volley.newRequestQueue(context)
@@ -145,7 +145,8 @@ object WebServiceLogin {
             POST,
             url,
             Response.Listener {
-                respuesta.invoke(it)
+                val tokenResponse = Gson().fromJson(it, TokenResponse::class.java)
+                respuesta.invoke(tokenResponse)
                              },
             Response.ErrorListener { error ->
                 respuesta.invoke(null)

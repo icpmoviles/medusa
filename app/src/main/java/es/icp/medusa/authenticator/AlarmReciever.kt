@@ -50,7 +50,7 @@ class AlarmReciever: BroadcastReceiver() {
                         )
                         Log.w("suces", successfull.toString())
                         if (successfull)
-                            setAlarm(context, (am.getTimeExpire(it).toLong() - 100))
+                            setAlarm(context, am.getTimeExpire(it).time)
                         else {
                             notifyNotification(context, name)
 //                            Log.w("no suces", "refresh fail")
@@ -58,13 +58,7 @@ class AlarmReciever: BroadcastReceiver() {
 //                                Intent(context, IntroActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
 //                            )
                         }
-                    } ?: kotlin.run {
-
-//                        context.startActivity(
-//                            Intent(context, IntroActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-//                        )
-                        notifyNotification(context, name)
-                    }
+                    }?: kotlin.run { notifyNotification(context, name) }
                 }
             }
             else {

@@ -54,11 +54,16 @@ class HomeFragment : Fragment() {
 
         binding.btnLogOut.setOnClickListener{ logOut() }
         binding.btnIsTokenValid.setOnClickListener {
-            val valido = am.isAccountTokenValid(currentAccount)
-            if (valido)
-                Log.w("HOME FRAGMENT isvalid", valido.toString())
-            else
-                Log.w("HOME FRAGMENT isNOTvalid", valido.toString())
+            am.isTokenValidFromServer(
+                requireContext(),
+                currentAccount
+            ){
+                if (it)
+                    Log.w("HOME FRAGMENT isvalid", it.toString())
+                else
+                    Log.w("HOME FRAGMENT isNOTvalid", it.toString())
+            }
+
 
         }
         binding.btnRefreshToken.setOnClickListener{
