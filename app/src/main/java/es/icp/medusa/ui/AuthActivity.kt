@@ -61,8 +61,8 @@ class AuthActivity : AppCompatActivity() {
             context,
             request)
         {
-            it?.let {
-                callGetUserData(it, user, pass)
+            it?.let { token->
+                callGetUserData(token, user, pass)
             }?: kotlin.run {
                 Toast.makeText(context, "Credenciales de acceso incorrectas.", Toast.LENGTH_LONG).show()
             }
@@ -79,7 +79,7 @@ class AuthActivity : AppCompatActivity() {
             it?.let {
                 // login correcto -> creacion de cuenta
                 // aplicamos a la respuesta el tiempo de expiracion
-                tokenResponse.dateExpire = Date().addSeconds( (tokenResponse.expiresIn - 100 ))
+                tokenResponse.dateExpire = Date().addSeconds((tokenResponse.expiresIn - 100))
                 //Creamos la cuenta y el bundle de datos de usario(contendra el response)
                 val account = Account(user, MY_ACCOUNT_TYPE)
                 val userData = Bundle()
@@ -117,6 +117,7 @@ class AuthActivity : AppCompatActivity() {
     }
 
     private fun setAlarm(time: Long) {
+        Log.w("primer alarma", "se ejecuto")
         //obteniendo el administrador de alarmas
         val am = getSystemService(ALARM_SERVICE) as AlarmManager
 

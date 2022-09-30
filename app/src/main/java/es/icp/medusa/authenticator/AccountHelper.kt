@@ -121,9 +121,8 @@ fun AccountManager.isTokenValidFromServer(context: Context, account: Account, re
 /**
  * REFRESCA LOS DATOS DE ACCESO DEL USUARIO EN LA CUENTA
  */
-fun AccountManager.refreshToken(context: Context, account: Account) : Boolean{
+fun AccountManager.refreshToken(context: Context, account: Account, resultado: (Boolean) -> Unit){
     val currentToken = this.getToken(account)
-    var success = false
     currentToken?.let {  token ->
         WebServiceLogin.refreshToken(
             context = context,
@@ -138,12 +137,10 @@ fun AccountManager.refreshToken(context: Context, account: Account) : Boolean{
                     Gson().toJson(it)
                 )
                 this.setAuthToken(account, MY_AUTH_TOKEN_TYPE, it.accessToken)
-                success = true
-                return@let
+                resultado.invoke(true)
             }
         }
-        return success
-    }?: kotlin.run { return success }
+    }?: kotlin.run { resultado.invoke(false) }
 }
 
 /**

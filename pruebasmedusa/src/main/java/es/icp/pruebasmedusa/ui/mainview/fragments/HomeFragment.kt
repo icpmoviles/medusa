@@ -70,7 +70,7 @@ class HomeFragment : Fragment() {
             am.refreshToken(
                 requireContext(),
                 currentAccount
-            )
+            ){}
 
         }
 
