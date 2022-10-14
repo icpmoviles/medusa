@@ -43,13 +43,17 @@ class AlarmReciever: BroadcastReceiver() {
                 Log.w("::::", "APP EN PRIMER PLANO")
                 account?.let {
                     am.refreshToken(context, it){ result ->
-                        if (result){
-                            setAlarm(context, am.getTimeExpire(it).time, nameAccount)
-                            Log.w("suces refresh", "token refrescado")
-                        } else {
-                            createNotificationChannel(context)
-                            notifyNotification(context, nameAccount)
+                        when (result){
+                            true -> {
+                                setAlarm(context, am.getTimeExpire(it).time, nameAccount)
+                                Log.w("suces refresh", "token refrescado")
+                            }
+                            false ->{
+                                createNotificationChannel(context)
+                                notifyNotification(context, nameAccount)
+                            }
                         }
+
                     }
                 } ?: kotlin.run {
                     createNotificationChannel(context)

@@ -20,6 +20,7 @@ import es.icp.medusa.databinding.ActivityAuthBinding
 import es.icp.medusa.modelo.TokenRequest
 import es.icp.medusa.modelo.TokenResponse
 import es.icp.medusa.repo.WebServiceLogin
+import es.icp.medusa.utils.Dx
 import java.util.*
 
 class AuthActivity : AppCompatActivity() {
@@ -64,10 +65,13 @@ class AuthActivity : AppCompatActivity() {
             it?.let { token->
                 callGetUserData(token, user, pass)
             }?: kotlin.run {
-                Toast.makeText(context, "Credenciales de acceso incorrectas.", Toast.LENGTH_LONG).show()
+                Dx.dxWebServiceError(
+                    context,
+                    "Se ha producido un error",
+                    "Las credenciales introducidas son incorrectas."
+                ){ }
             }
-
-
+            Dx.hideLoader()
         }
 
     }
@@ -169,13 +173,14 @@ class AuthActivity : AppCompatActivity() {
                     return@setOnClickListener
                 }
                 TextUtils.isEmpty(pass) -> {
-                    binding.layoutPasswordLogin.error = "La contraseña no puede estar en vacía."
+                    binding.layoutPasswordLogin.error = "La contraseña no puede estar vacía."
                     binding.txtpasswordLogin.requestFocus()
                     return@setOnClickListener
                 }
             }
-
+            Dx.createLoader(context)
             finishLogin(user, pass)
+
         }
     }
 

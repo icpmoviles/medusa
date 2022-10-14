@@ -108,12 +108,14 @@ fun AccountManager.isTokenValidFromServer(context: Context, account: Account, re
             context,
             token
         ) { valid ->
-            if (valid)
-                resultado.invoke(valid)
-            else {
-                this.invalidateAuthToken(MY_AUTH_TOKEN_TYPE, token)
-                resultado.invoke(false)
+            when (valid){
+                true -> resultado.invoke(true)
+                else -> {
+                    this.invalidateAuthToken(MY_AUTH_TOKEN_TYPE, token)
+                    resultado.invoke(false)
+                }
             }
+
         }
     }?: kotlin.run { resultado.invoke(false) }
 }
