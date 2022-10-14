@@ -52,4 +52,6 @@ dependencies {
     //VOLLEY: peticiones al servidor
     implementation 'com.android.volley:volley:1.2.1'
 
+    implementation 'com.github.icpmoviles:icp_commons:3.4.8'
+
 }
