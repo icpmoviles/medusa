@@ -49,6 +49,7 @@ object Dx {
     fun hideLoader() {
         loader?.let {
             loader?.dismiss()
+            loader = null
         }
     }
 
