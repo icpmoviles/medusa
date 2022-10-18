@@ -2,7 +2,7 @@ package es.icp.medusa.utils
 
 object Constantes {
 
-    const val BASE_URL = "https://perseo-login-int.icp.es/"
+    const val BASE_URL = "https://perseo-login.icp.es/"
     const val ENDPOINT_LOGIN = "icpsec/Fac/Login"
     const val ENDPOINT_USERS = "api/Users"
     const val ENDPOINT_LOGOUT = "icpsec/Fac/Logout"

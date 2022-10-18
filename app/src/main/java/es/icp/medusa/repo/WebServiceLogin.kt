@@ -46,7 +46,7 @@ object WebServiceLogin {
         ) {
             override fun getHeaders(): MutableMap<String, String> {
                 return mutableMapOf(
-                    "ih" to "H4sIAAAAAAACCqpW8kxxLChQsjLXAbKccxIzc0MqC1KLlazySnNyagEAAAD//w=="
+                    "ih" to "H4sIAAAAAAACCqpW8kxxLChQslIwNK8FAAAA//8="
                 )
             }
 
@@ -75,7 +75,7 @@ object WebServiceLogin {
         ) {
             override fun getHeaders(): MutableMap<String, String> {
                 return mutableMapOf(
-                    "ih" to "H4sIAAAAAAACCqpW8kxxLChQsjLXAbKccxIzc0MqC1KLlazySnNyagEAAAD//w==",
+                    "ih" to "H4sIAAAAAAACCqpW8kxxLChQslIwNK8FAAAA//8=",
                     "Authorization" to "Bearer $token"
                 )
             }
@@ -102,7 +102,7 @@ object WebServiceLogin {
         ) {
             override fun getHeaders(): MutableMap<String, String> {
                 return mutableMapOf(
-                    "ih" to "H4sIAAAAAAACCqpW8kxxLChQsjLXAbKccxIzc0MqC1KLlazySnNyagEAAAD//w==",
+                    "ih" to "H4sIAAAAAAACCqpW8kxxLChQslIwNK8FAAAA//8=",
                     "Authorization" to "Bearer $token"
                 )
             }
@@ -127,7 +127,7 @@ object WebServiceLogin {
         ) {
             override fun getHeaders(): MutableMap<String, String> {
                 return mutableMapOf(
-                    "ih" to "H4sIAAAAAAACCqpW8kxxLChQsjLXAbKccxIzc0MqC1KLlazySnNyagEAAAD//w==",
+                    "ih" to "H4sIAAAAAAACCqpW8kxxLChQslIwNK8FAAAA//8=",
                     "Authorization" to "Bearer $token"
                 )
             }
@@ -155,7 +155,7 @@ object WebServiceLogin {
         ) {
             override fun getHeaders(): MutableMap<String, String> {
                 return mutableMapOf(
-                    "ih" to "H4sIAAAAAAACCqpW8kxxLChQsjLXAbKccxIzc0MqC1KLlazySnNyagEAAAD//w==",
+                    "ih" to "H4sIAAAAAAACCqpW8kxxLChQslIwNK8FAAAA//8=",
                     "Authorization" to "Bearer $token"
                 )
             }
