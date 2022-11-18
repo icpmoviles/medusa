@@ -7,22 +7,14 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.os.Build
-import android.os.Bundle
-import android.os.Looper
 import android.util.Log
-import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import androidx.core.content.ContextCompat
-import androidx.core.content.ContextCompat.getSystemService
-import androidx.core.content.getSystemService
-import com.google.gson.Gson
 import es.icp.medusa.R
-import es.icp.medusa.repo.WebServiceLogin
-import es.icp.medusa.ui.IntroActivity
-import es.icp.medusa.utils.Dx
+import es.icp.medusa.utils.Constantes
+
 
 class AlarmReciever: BroadcastReceiver() {
 
@@ -42,7 +34,7 @@ class AlarmReciever: BroadcastReceiver() {
             if (appInForeground(context)) {
                 Log.w("::::", "APP EN PRIMER PLANO")
                 account?.let {
-                    am.refreshToken(context, it){ result ->
+                    am.refreshAuthToken(context, it){ result ->
                         when (result){
                             true -> {
                                 setAlarm(context, am.getTimeExpire(it).time, nameAccount)
@@ -51,6 +43,7 @@ class AlarmReciever: BroadcastReceiver() {
                             false ->{
                                 createNotificationChannel(context)
                                 notifyNotification(context, nameAccount)
+                                am.clearAuthToken(it)
                             }
                         }
 
@@ -62,7 +55,7 @@ class AlarmReciever: BroadcastReceiver() {
             }
             else {
                 account?.let {
-                    am.clearToken(it)
+                    am.clearAuthToken(it)
                 }
                 createNotificationChannel(context)
                 notifyNotification(context, nameAccount)
@@ -98,7 +91,7 @@ class AlarmReciever: BroadcastReceiver() {
 
     }
 
-    fun appInForeground(context: Context): Boolean {
+    private fun appInForeground(context: Context): Boolean {
         val activityManager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
         val runningAppProcesses = activityManager.runningAppProcesses ?: return false
         return runningAppProcesses.any { it.processName == context.packageName && it.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND }
@@ -115,11 +108,11 @@ class AlarmReciever: BroadcastReceiver() {
         //creando una intención pendiente usando la intención
         //configurar la alarma que se activará cuando expire el token
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
-            val pi = PendingIntent.getBroadcast(context, 0, i, PendingIntent.FLAG_CANCEL_CURRENT) // estab en 0
+            val pi = PendingIntent.getBroadcast(context, Constantes.REQUEST_CODE_FIN_SESION, i, PendingIntent.FLAG_CANCEL_CURRENT) // estab en 0
             am.set(AlarmManager.RTC,time,pi)
         }
         else {
-            val pi = PendingIntent.getBroadcast(context, 0, i, PendingIntent.FLAG_MUTABLE)
+            val pi = PendingIntent.getBroadcast(context, Constantes.REQUEST_CODE_FIN_SESION, i, PendingIntent.FLAG_MUTABLE)
             am.set(AlarmManager.RTC,time,pi)
         }
 
@@ -128,4 +121,6 @@ class AlarmReciever: BroadcastReceiver() {
 
 //        Toast.makeText(this, "La alarma está configurada", Toast.LENGTH_SHORT).show()
     }
+
+
 }

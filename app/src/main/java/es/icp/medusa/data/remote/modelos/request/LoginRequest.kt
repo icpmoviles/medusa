@@ -1,11 +1,11 @@
-package es.icp.medusa.modelo
+package es.icp.medusa.data.remote.modelos.request
 
 import com.google.gson.annotations.SerializedName
-import es.icp.medusa.modelo.comunes.BaseObject
+import java.io.Serializable
 
-data class TokenRequest(
+data class LoginRequest(
     @SerializedName("u")
     val username: String = "",
     @SerializedName("p")
     val password : String = ""
-) : BaseObject()
+) : Serializable
