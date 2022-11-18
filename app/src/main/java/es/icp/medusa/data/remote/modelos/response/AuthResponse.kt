@@ -1,10 +1,10 @@
-package es.icp.medusa.modelo
+package es.icp.medusa.data.remote.modelos.response
 
 import com.google.gson.annotations.SerializedName
 import java.io.Serializable
 import java.util.*
 
-data class TokenResponse(
+data class AuthResponse(
 
     @SerializedName("access_token")
     var accessToken: String = "",

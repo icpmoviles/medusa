@@ -1,11 +1,10 @@
-package es.icp.medusa.modelo
+package es.icp.medusa.data.remote.modelos.response
 
 import com.google.gson.annotations.SerializedName
-import es.icp.medusa.modelo.comunes.BaseObject
 import java.io.Serializable
 import java.util.*
 
-data class UsuarioLogin(
+data class UsuarioResponse(
     @SerializedName("idUsuario")
     var idUsuario: Int = 0,
     @SerializedName("usuario")
@@ -33,4 +32,4 @@ data class UsuarioLogin(
     @SerializedName("idPerfil")
     var idPerfil: Int = 0
 
-) : BaseObject(), Serializable
+) : Serializable

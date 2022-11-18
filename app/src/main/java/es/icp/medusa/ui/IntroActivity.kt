@@ -4,15 +4,20 @@ import android.accounts.Account
 import android.accounts.AccountManager
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
+import es.icp.medusa.AuthViewModel
 import es.icp.medusa.authenticator.*
 import es.icp.medusa.databinding.ActivityIntroBinding
+import es.icp.medusa.utils.GlobalVariable
 
 class IntroActivity : AppCompatActivity() {
 
@@ -20,6 +25,8 @@ class IntroActivity : AppCompatActivity() {
     private lateinit var context: Context
     private lateinit var am: AccountManager
     private lateinit var account: Account
+    private val authViewModel: AuthViewModel by viewModels()
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,13 +55,16 @@ class IntroActivity : AppCompatActivity() {
                 1 -> {
                     Log.w("splash activity", "hay una cuenta")
                     account = accounts[0]
-                    am.isTokenValidFromServer(
-                        context,
-                        account
-                    ) {
-                        if (it) goToHomeActivity(account)
-                        else authIntent(account.name)
-                    }
+                    val token = am.getAuthToken(account)
+                    token?.let {
+                        goToHomeActivity(account)
+                        GlobalVariable.accessToken = it
+
+                    }?: kotlin.run { authIntent(account.name) }
+//                    am.isTokenValid(account) {
+//                        if (it) goToHomeActivity(account)
+//                        else authIntent(account.name)
+//                    }
                 }
                 else -> choiceAccountDialog()
             }
@@ -64,17 +74,21 @@ class IntroActivity : AppCompatActivity() {
 
 
     private fun authIntent(nameAccount: String) =
-        authLauncher.launch(Intent(context, AuthActivity::class.java).putExtra(KEY_NAME_ACCOUNT, nameAccount))
+        authLauncher.launch(Intent(applicationContext, AuthActivity::class.java).putExtra(KEY_NAME_ACCOUNT, nameAccount))
 
-    private val authLauncher =
+    private val authLauncher: ActivityResultLauncher<Intent> =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()){ result ->
             if (result.resultCode == RESULT_OK){
                 // recuperar bundle del intent
                 val bundle = result.data?.getBundleExtra(KEY_BUNDLE_ACCOUNT)
                 // recuperar la cuenta enviada desde authActivity
-                val account = bundle?.get(KEY_BUNDLE_ACCOUNT) as Account
+                val account : Account? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    bundle?.getParcelable(KEY_BUNDLE_ACCOUNT, Account::class.java)
+                } else {
+                    bundle?.get(KEY_BUNDLE_ACCOUNT)!! as Account
+                }
                 //enviar la cuenta al activity principal
-                goToHomeActivity(account)
+                account?.let { goToHomeActivity(it) }
             } else finish()
         }
 
@@ -100,7 +114,7 @@ class IntroActivity : AppCompatActivity() {
         }
         val items = lista.toTypedArray()
 
-        AlertDialog.Builder(this)
+        AlertDialog.Builder(context)
             .setTitle("Elige un usuario")
             .setCancelable(false)
             .setSingleChoiceItems(items, -1) { _, i ->
@@ -108,17 +122,15 @@ class IntroActivity : AppCompatActivity() {
             }
             .setPositiveButton("ACEPTAR") { _, _ ->
                 account = am.getAccountByName(items[eleccion])!!
-                am.isTokenValidFromServer(
-                    context,
-                    account
-                ) {
-                    if (it)
-                        goToHomeActivity(account)
-                    else
-                        authIntent(account.name)
+                val token = am.getAuthToken(account)
+                token?.let {
+                    goToHomeActivity(account)
+                    GlobalVariable.accessToken = it
+                }?: kotlin.run {
+                    authIntent(account.name)
                 }
-
             }
+            .create()
             .show()
     }
 

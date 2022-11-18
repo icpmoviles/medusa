@@ -2,17 +2,24 @@ package es.icp.pruebasmedusa.ui.mainview.fragments
 
 import android.accounts.Account
 import android.accounts.AccountManager
+import android.app.AlarmManager
+import android.app.PendingIntent
+import android.content.Context
+import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import com.google.gson.Gson
+import es.icp.medusa.AuthViewModel
 import es.icp.medusa.authenticator.*
-import es.icp.medusa.modelo.TokenResponse
-import es.icp.medusa.repo.WebServiceLogin
+import es.icp.medusa.data.remote.modelos.response.AuthResponse
+import es.icp.medusa.utils.Constantes
 import es.icp.pruebasmedusa.databinding.FragmentHomeBinding
 import es.icp.pruebasmedusa.ui.mainview.MainActivity
 
@@ -24,7 +31,10 @@ class HomeFragment : Fragment() {
     private val binding get() = _binding!!
     private lateinit var currentAccount: Account
     private lateinit var am: AccountManager
-    private lateinit var tokenResponse: TokenResponse
+    private lateinit var authResponse: AuthResponse
+    private val authViewModel: AuthViewModel by viewModels()
+
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -47,17 +57,17 @@ class HomeFragment : Fragment() {
         binding.txt.text = currentAccount.toString()
 
 
-        tokenResponse =
-            Gson().fromJson(am.getUserData(currentAccount, KEY_USERDATA_TOKEN), TokenResponse::class.java)
+        authResponse =
+            Gson().fromJson(am.getUserData(currentAccount, KEY_USERDATA_TOKEN), AuthResponse::class.java)
 
 
 
-        binding.btnLogOut.setOnClickListener{ logOut() }
+        binding.btnLogOut.setOnClickListener{
+            logOut()
+            cancelAlarm(requireContext())
+        }
         binding.btnIsTokenValid.setOnClickListener {
-            am.isTokenValidFromServer(
-                requireContext(),
-                currentAccount
-            ){
+            am.isTokenValid(currentAccount) {
                 if (it)
                     Log.w("HOME FRAGMENT isvalid", it.toString())
                 else
@@ -67,34 +77,37 @@ class HomeFragment : Fragment() {
 
         }
         binding.btnRefreshToken.setOnClickListener{
-            am.refreshToken(
-                requireContext(),
-                currentAccount
-            ){}
+            am.refreshAuthToken( requireContext(), currentAccount){
+                Log.w("respose btn re", it.toString())
+            }
 
         }
 
         binding.btnInfo.setOnClickListener {
-            Log.w("token::", am.getTokenResponse(currentAccount).toString())
-            Log.w("user:::", am.getUserDataResponse(currentAccount).toString())
+            Log.w("token::", am.getAuthResponse(currentAccount).toString())
+            Log.w("user:::", am.getUsusarioResponse(currentAccount).toString())
         }
     }
 
     fun logOut() {
-
-        am.removeTokenAccount(currentAccount)
-
-
-        WebServiceLogin.invalidateToken(
-            requireContext(),
-            tokenResponse.accessToken
-        ){
-            am.clearToken(currentAccount)
-            if (it) {
-            }
+        am.clearAuthToken(currentAccount)
+        authViewModel.logOut {
             Log.w("SALIENDO LOGIN", it.toString())
         }
-//        requireActivity().finish()
-//        startActivity(Intent(requireContext(), IntroActivity::class.java))
+    }
+
+    fun cancelAlarm(context: Context){
+        val alarmManager = context.getSystemService(AppCompatActivity.ALARM_SERVICE) as AlarmManager?
+        val i = Intent(requireContext(), AlarmReciever::class.java).putExtra(KEY_NAME_ACCOUNT, currentAccount.name )
+
+
+            val pi = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+                PendingIntent.getBroadcast(requireContext(), Constantes.REQUEST_CODE_FIN_SESION, i, PendingIntent.FLAG_CANCEL_CURRENT) // estab en 0
+            }
+            else {
+                PendingIntent.getBroadcast(requireContext(), Constantes.REQUEST_CODE_FIN_SESION, i, PendingIntent.FLAG_MUTABLE)
+            }
+
+        alarmManager!!.cancel(pi)
     }
 }
