@@ -27,6 +27,22 @@ class IntroActivity : AppCompatActivity() {
     private lateinit var account: Account
     private val authViewModel: AuthViewModel by viewModels()
 
+    private val authLauncher: ActivityResultLauncher<Intent> =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()){ result ->
+            if (result.resultCode == RESULT_OK){
+                // recuperar bundle del intent
+                val bundle = result.data?.getBundleExtra(KEY_BUNDLE_ACCOUNT)
+                // recuperar la cuenta enviada desde authActivity
+                val account : Account? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    bundle?.getParcelable(KEY_BUNDLE_ACCOUNT, Account::class.java)
+                } else {
+                    bundle?.get(KEY_BUNDLE_ACCOUNT)!! as Account
+                }
+                //enviar la cuenta al activity principal
+                account?.let { goToHomeActivity(it) }
+            } else finish()
+        }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -76,21 +92,7 @@ class IntroActivity : AppCompatActivity() {
     private fun authIntent(nameAccount: String) =
         authLauncher.launch(Intent(applicationContext, AuthActivity::class.java).putExtra(KEY_NAME_ACCOUNT, nameAccount))
 
-    private val authLauncher: ActivityResultLauncher<Intent> =
-        registerForActivityResult(ActivityResultContracts.StartActivityForResult()){ result ->
-            if (result.resultCode == RESULT_OK){
-                // recuperar bundle del intent
-                val bundle = result.data?.getBundleExtra(KEY_BUNDLE_ACCOUNT)
-                // recuperar la cuenta enviada desde authActivity
-                val account : Account? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                    bundle?.getParcelable(KEY_BUNDLE_ACCOUNT, Account::class.java)
-                } else {
-                    bundle?.get(KEY_BUNDLE_ACCOUNT)!! as Account
-                }
-                //enviar la cuenta al activity principal
-                account?.let { goToHomeActivity(it) }
-            } else finish()
-        }
+
 
     private fun goToHomeActivity(account: Account){
         Log.w("package", packageName)
