@@ -1,11 +1,13 @@
 package es.icp.medusa.utils
 
 import android.animation.ObjectAnimator
+import android.app.Activity
 import android.graphics.RenderEffect
 import android.graphics.Shader
 import android.os.Build
 import android.view.View
 import android.view.animation.LinearInterpolator
+import android.view.inputmethod.InputMethodManager
 import androidx.core.content.res.ResourcesCompat
 import com.google.gson.Gson
 import es.icp.medusa.R
@@ -48,4 +50,10 @@ fun View.visible() {
 
 fun View.hide() {
     this.visibility = View.GONE
+}
+
+fun View.hideKeyBoard(){
+    val imm: InputMethodManager =
+        this.context.getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
+    imm.hideSoftInputFromWindow(this.windowToken, 0)
 }

@@ -75,6 +75,7 @@ class AuthActivity : AppCompatActivity() {
 
         btnLogin.setOnClickListener {
 
+            it.hideKeyBoard()
             val user = txtuserNameLogin.text.toString().trimEnd()
             val pass = txtpasswordLogin.text.toString().trimEnd()
 
@@ -110,8 +111,7 @@ class AuthActivity : AppCompatActivity() {
     private fun hideMeLoader () = with(binding) {
         imageLoader.hide()
         viewDisable.hide()
-        containerLogin
-            .removeBlur()
+        containerLogin.removeBlur()
     }
 
 

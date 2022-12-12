@@ -17,12 +17,15 @@
 <!--    <uses-permission android:name="android.permission.RECORD_AUDIO"/>-->
 
     <application
-        android:usesCleartextTraffic="true">
+        android:usesCleartextTraffic="true"
+        android:theme="@style/Theme.Medusa">
         <activity
             android:name=".ui.IntroActivity"
             android:exported="true"
             android:clearTaskOnLaunch="true"
             android:launchMode="singleInstance"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.Medusa"
             >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -33,7 +36,9 @@
         <activity
             android:name=".ui.AuthActivity"
             android:exported="false"
-            android:launchMode="singleInstance"/>
+            android:launchMode="singleInstance"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.Medusa"/>
 
         <receiver
             android:name="es.icp.medusa.authenticator.AlarmReciever"
