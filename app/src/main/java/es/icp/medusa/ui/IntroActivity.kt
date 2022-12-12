@@ -89,8 +89,12 @@ class IntroActivity : AppCompatActivity() {
     }
 
 
-    private fun authIntent(nameAccount: String) =
-        authLauncher.launch(Intent(applicationContext, AuthActivity::class.java).putExtra(KEY_NAME_ACCOUNT, nameAccount))
+    private fun authIntent(nameAccount: String) {
+        val intent = Intent(applicationContext, AuthActivity::class.java).also {
+            it.putExtra(KEY_NAME_ACCOUNT, nameAccount)
+        }
+        authLauncher.launch(intent)
+    }
 
 
 
@@ -137,3 +141,4 @@ class IntroActivity : AppCompatActivity() {
     }
 
 }
+
