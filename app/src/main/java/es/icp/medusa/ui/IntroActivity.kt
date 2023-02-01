@@ -57,6 +57,13 @@ class IntroActivity : AppCompatActivity() {
 
     }
 
+    private fun authIntent(nameAccount: String) {
+        val intent = Intent(applicationContext, AuthActivity::class.java).also {
+            it.putExtra(KEY_NAME_ACCOUNT, nameAccount)
+        }
+        authLauncher.launch(intent)
+    }
+
     private fun setUpView() {
 
         am = AccountManager.get(context)
@@ -87,15 +94,6 @@ class IntroActivity : AppCompatActivity() {
         }
 
     }
-
-
-    private fun authIntent(nameAccount: String) {
-        val intent = Intent(applicationContext, AuthActivity::class.java).also {
-            it.putExtra(KEY_NAME_ACCOUNT, nameAccount)
-        }
-        authLauncher.launch(intent)
-    }
-
 
 
     private fun goToHomeActivity(account: Account){

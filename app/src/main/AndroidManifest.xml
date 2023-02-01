@@ -34,7 +34,6 @@
         <activity
             android:name=".ui.AuthActivity"
             android:exported="false"
-            android:launchMode="singleInstance"
             android:screenOrientation="portrait"/>
 
         <receiver
