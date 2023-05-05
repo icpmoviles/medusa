@@ -1,9 +1,9 @@
-package es.icp.medusa.data.remote.modelos.request
+package es.icp.medusa.data.remote.modelos
 
 import com.google.gson.annotations.SerializedName
 import java.io.Serializable
 
-data class LoginRequest(
+data class AuthRequest(
     @SerializedName("u")
     val username: String = "",
     @SerializedName("p")
