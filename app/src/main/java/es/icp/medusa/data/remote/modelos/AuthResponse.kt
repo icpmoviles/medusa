@@ -1,4 +1,4 @@
-package es.icp.medusa.data.remote.modelos.response
+package es.icp.medusa.data.remote.modelos
 
 import com.google.gson.annotations.SerializedName
 import java.io.Serializable

@@ -3,22 +3,27 @@ package es.icp.pruebasmedusa.ui.mainview
 import android.accounts.Account
 import android.accounts.AccountManager
 import android.content.Context
-import android.content.Intent
-import android.os.Build
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
-import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
+import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupActionBarWithNavController
-import es.icp.medusa.authenticator.*
-import es.icp.medusa.data.remote.modelos.response.AuthResponse
-import es.icp.medusa.data.remote.modelos.response.UsuarioResponse
+import dagger.hilt.android.AndroidEntryPoint
+import es.icp.medusa.data.remote.modelos.AuthRequest
+import es.icp.medusa.data.remote.modelos.AuthResponse
+import es.icp.medusa.data.remote.service.AuthService
+import es.icp.medusa.utils.getAccountByName
+import es.icp.medusa.utils.getRefreshToken
+import es.icp.medusa.utils.getToken
 import es.icp.pruebasmedusa.R
 import es.icp.pruebasmedusa.databinding.ActivityMainBinding
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
+
+@AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
@@ -26,23 +31,10 @@ class MainActivity : AppCompatActivity() {
     private lateinit var navController: NavController
     lateinit var account: Account
     lateinit var accountManager: AccountManager
-    lateinit var usuarioResponse: UsuarioResponse
     lateinit var authResponse: AuthResponse
 
-    val result: ActivityResultLauncher<Intent> = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-        if (it.resultCode == RESULT_OK) {
-            accountManager = AccountManager.get(context)
-            account =
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
-                    intent.getParcelableExtra(KEY_BUNDLE_ACCOUNT, Account::class.java)!!
-                else
-                    intent.getParcelableExtra(KEY_BUNDLE_ACCOUNT)!!
-            usuarioResponse = accountManager.getUsusarioResponse(account)
-            authResponse = accountManager.getAuthResponse(account)
-            Log.w("Activity Result ,main->", accountManager.getAuthResponse(account).toString())
+    private val vm : MainViewModel by viewModels()
 
-        }
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -60,16 +52,24 @@ class MainActivity : AppCompatActivity() {
         navController.setGraph(R.navigation.graph_nav_main)
         setupActionBarWithNavController(navController)
 
-        account = intent.getParcelableExtra(KEY_BUNDLE_ACCOUNT)!!
-        usuarioResponse = accountManager.getUsusarioResponse(account)
-        authResponse = accountManager.getAuthResponse(account)
+//        vm.getAuthToken("https://ticketingicp.icp.es:9013/" + AuthService.ENDPOINT_LOGIN, AuthRequest("icp.5241","Temporal2."))
 
-        val dataToken = accountManager.getUserData(account, KEY_USERDATA_TOKEN)
-        val dataUser = accountManager.getUserData(account, KEY_USERDATA_INFO)
+        lifecycleScope.launch {
+            vm.getTokenPerseo(AuthRequest("icp.5241","Temporal2."))
+            delay(5000)
+            val account = accountManager.getAccountByName("icp.5241")
+            vm.isTokenValid(account!!)
+            delay(2000)
+            vm.refreshToken(account)
+            delay(2000)
+            vm.isTokenValid(account)
 
-        Log.w("mainActivity", "account -> $account")
-        Log.w("dataToken", "data token -> $authResponse")
-        Log.w("dataToken", "data user -> $usuarioResponse")
+            delay(2000)
+            vm.logOut(account)
+            delay(2000)
+            vm.isTokenValid(account)
+
+        }
 
     }
 

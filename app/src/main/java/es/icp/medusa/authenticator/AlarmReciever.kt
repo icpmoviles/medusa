@@ -13,7 +13,11 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import es.icp.medusa.R
-import es.icp.medusa.utils.Constantes
+import es.icp.medusa.authenticator.AlarmReciever.Companion.NOTIFICATION_CHANNEL_ID
+import es.icp.medusa.data.remote.service.AuthService
+import es.icp.medusa.utils.ConstantesAuthPerseo
+import es.icp.medusa.utils.ConstantesAuthPerseo.KEY_NAME_ACCOUNT
+import es.icp.medusa.utils.getAccountByName
 
 
 class AlarmReciever: BroadcastReceiver() {
@@ -31,40 +35,40 @@ class AlarmReciever: BroadcastReceiver() {
         if (nameAccount.isNotBlank()){
             val account : Account? = am.getAccountByName(nameAccount)
 
-            if (appInForeground(context)) {
-                Log.w("::::", "APP EN PRIMER PLANO")
-                account?.let {
-                    am.refreshAuthToken(context, it){ result ->
-                        when (result){
-                            true -> {
-                                setAlarm(context, am.getTimeExpire(it).time, nameAccount)
-                                Log.w("suces refresh", "token refrescado")
-                            }
-                            false ->{
-                                createNotificationChannel(context)
-                                notifyNotification(context, nameAccount)
-                                am.clearAuthToken(it)
-                            }
-                        }
-
-                    }
-                } ?: kotlin.run {
-                    createNotificationChannel(context)
-                    notifyNotification(context, nameAccount)
-                }
-            }
-            else {
-                account?.let {
-                    am.clearAuthToken(it)
-                }
-                createNotificationChannel(context)
-                notifyNotification(context, nameAccount)
-
-            }
+//            if (appInForeground(context)) {
+//                Log.w("::::", "APP EN PRIMER PLANO")
+//                account?.let {
+//                    am.refreshAuthToken(context, it){ result ->
+//                        when (result){
+//                            true -> {
+//                                setAlarm(context, am.getTimeExpire(it).time, nameAccount)
+//                                Log.w("suces refresh", "token refrescado")
+//                            }
+//                            false ->{
+//                                createNotificationChannel(context)
+//                                notifyNotification(context, nameAccount)
+//                                am.clearAuthToken(it)
+//                            }
+//                        }
+//
+//                    }
+//                } ?: kotlin.run {
+//                    createNotificationChannel(context)
+//                    notifyNotification(context, nameAccount)
+//                }
+//            }
+//            else {
+//                account?.let {
+//                    am.clearAuthToken(it)
+//                }
+//                createNotificationChannel(context)
+//                notifyNotification(context, nameAccount)
+//
+//            }
         }
 
 
-        Log.w("EEEEEEEEEEEEEEEEE", "AGARRALO FUERTE BROTHER")
+//        Log.w("EEEEEEEEEEEEEEEEE", "AGARRALO FUERTE BROTHER")
     }
 
     private fun createNotificationChannel(context: Context) {
@@ -79,15 +83,15 @@ class AlarmReciever: BroadcastReceiver() {
     }
 
     private fun notifyNotification(context: Context, accountName: String) {
-        with(NotificationManagerCompat.from(context)) {
-            val build = NotificationCompat.Builder(context, NOTIFICATION_CHANNEL_ID)
-                .setContentTitle("ICP Perseo")
-                .setContentText("La sesion del usuario '$accountName' ha expirado.")
-                .setSmallIcon(R.drawable.icp_software)
-                .setPriority(NotificationCompat.PRIORITY_HIGH)
-            notify(NOTIFICATION_ID, build.build())
-
-        }
+//        with(NotificationManagerCompat.from(context)) {
+//            val build = NotificationCompat.Builder(context, NOTIFICATION_CHANNEL_ID)
+//                .setContentTitle("ICP Perseo")
+//                .setContentText("La sesion del usuario '$accountName' ha expirado.")
+//                .setSmallIcon(R.drawable.icp_software)
+//                .setPriority(NotificationCompat.PRIORITY_HIGH)
+//            notify(NOTIFICATION_ID, build.build())
+//
+//        }
 
     }
 
@@ -108,11 +112,11 @@ class AlarmReciever: BroadcastReceiver() {
         //creando una intención pendiente usando la intención
         //configurar la alarma que se activará cuando expire el token
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
-            val pi = PendingIntent.getBroadcast(context, Constantes.REQUEST_CODE_FIN_SESION, i, PendingIntent.FLAG_CANCEL_CURRENT) // estab en 0
+            val pi = PendingIntent.getBroadcast(context, ConstantesAuthPerseo.REQUEST_CODE_FIN_SESION, i, PendingIntent.FLAG_CANCEL_CURRENT) // estab en 0
             am.set(AlarmManager.RTC,time,pi)
         }
         else {
-            val pi = PendingIntent.getBroadcast(context, Constantes.REQUEST_CODE_FIN_SESION, i, PendingIntent.FLAG_MUTABLE)
+            val pi = PendingIntent.getBroadcast(context, ConstantesAuthPerseo.REQUEST_CODE_FIN_SESION, i, PendingIntent.FLAG_MUTABLE)
             am.set(AlarmManager.RTC,time,pi)
         }
 
