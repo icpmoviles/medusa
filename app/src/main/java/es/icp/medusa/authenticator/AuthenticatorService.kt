@@ -27,7 +27,7 @@ class AuthenticatorService: Service() {
     }
 
 
-    private class Authenticator(private val context: Context): AbstractAccountAuthenticator(context){
+    private class Authenticator(context: Context): AbstractAccountAuthenticator(context){
 
 
         override fun editProperties(

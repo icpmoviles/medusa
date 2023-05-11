@@ -114,7 +114,7 @@ fun AccountManager.createAccount(username: String, password: String, authRespons
  * @param account Cuenta a la que se quiere añadir la información de autenticación
  * @param authResponse Información de autenticación (authResponse)
  */
-fun AccountManager.setAuthData(authResponse: AuthResponse, account: Account) {
+fun AccountManager.setAuthResponse(authResponse: AuthResponse, account: Account) {
     this.setUserData(account, KEY_DATA_TOKEN, Gson().toJson(authResponse))
     this.setToken(account, authResponse.accessToken)
 }
@@ -124,7 +124,7 @@ fun AccountManager.setAuthData(authResponse: AuthResponse, account: Account) {
  * @param account Cuenta de la que se quiere obtener la información de autenticación
  * @return Información de autenticación (authResponse)
  */
-fun AccountManager.getAuthData(account: Account) : AuthResponse? {
+fun AccountManager.getAuthResponse(account: Account) : AuthResponse? {
     val userDataString = this.getUserData(account, KEY_DATA_TOKEN)
     return Gson().fromJson(userDataString, AuthResponse::class.java)
 }
@@ -135,7 +135,7 @@ fun AccountManager.getAuthData(account: Account) : AuthResponse? {
  * @param usuario Información del usuario
  * @param key Clave de la información que se quiere obtener
  */
-fun AccountManager.setUserData(account: Account, key: String, usuario: Any) =
+fun AccountManager.setUserResponse(account: Account, key: String, usuario: Any) =
     this.setUserData(account, key, Gson().toJson(usuario))
 
 /**
@@ -144,7 +144,7 @@ fun AccountManager.setUserData(account: Account, key: String, usuario: Any) =
  * @param key Clave de la información que se quiere obtener
  * @return Información del usuario
  */
-fun AccountManager.getUserData(account: Account, key: String) : String? =
+fun AccountManager.getUserResponse(account: Account, key: String) : String? =
     this.getUserData(account, key)
 
 /**
@@ -152,7 +152,7 @@ fun AccountManager.getUserData(account: Account, key: String) : String? =
  * @param account Cuenta de la que se quiere eliminar la información del usuario
  * @param key Clave de la información que se quiere eliminar
  */
-fun AccountManager.clearUserData(account: Account, key: String) =
+fun AccountManager.clearUserResponse(account: Account, key: String) =
     this.setUserData(account, key, null)
 
 private fun Date.add(field: Int, amount: Int): Date {

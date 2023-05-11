@@ -13,9 +13,6 @@
     <application
         android:usesCleartextTraffic="true">
 
-        <receiver
-            android:name="es.icp.medusa.authenticator.AlarmReciever"
-            android:exported="true" />
 
         <service
             android:name="es.icp.medusa.authenticator.AuthenticatorService"

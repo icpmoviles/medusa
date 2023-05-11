@@ -3,10 +3,8 @@ package es.icp.medusa.repositorio
 import android.accounts.Account
 import android.accounts.AccountManager
 import android.util.Log
-import es.icp.genericretrofit.models.NetworkResponse
 import es.icp.genericretrofit.utils.*
 import es.icp.medusa.data.remote.modelos.AuthRequest
-import es.icp.medusa.data.remote.modelos.AuthResponse
 import es.icp.medusa.data.remote.service.AuthService
 import es.icp.medusa.utils.*
 
@@ -32,7 +30,7 @@ class AuthRepo constructor(
                 Log.w("authRepo", "getAuthToken: $authResponse")
                 val cuenta = am.getAccountByName(request.username)
                 cuenta?.let {
-                    am.setAuthData(authResponse, it)
+                    am.setAuthResponse(authResponse, it)
                 }?: run {
                     am.createAccount(
                         username = request.username,
@@ -135,7 +133,8 @@ class AuthRepo constructor(
         authService.refreshAuthToken("Bearer $token", refreshToken)
             .onSuccess {
                 Log.w("refreshToken", "onSuccess: $it")
-                am.setAuthData(it, account)
+                am.setAuthResponse(it, account)
+                am.setToken(account, it.accessToken)
                 exito = Pair(true, null)
             }
             .onError { code, message ->
