@@ -7,6 +7,7 @@ import es.icp.genericretrofit.utils.*
 import es.icp.medusa.data.remote.modelos.AuthRequest
 import es.icp.medusa.data.remote.service.AuthService
 import es.icp.medusa.utils.*
+import kotlinx.coroutines.flow.update
 
 
 class AuthRepo constructor(
@@ -42,8 +43,10 @@ class AuthRepo constructor(
             }
             .onError { code, message ->
                 Log.w("onError getToken", "mensaje: $message code: $code")
-                exito = Pair(false, message)
-
+                exito = Pair(
+                    false,
+                    if (code == 401) "Usuario o contraseña incorrectos." else message
+                )
             }
             .onException { ex ->
                 exito = Pair(false, ex.message)
