@@ -15,21 +15,14 @@ object ConstantesAuthPerseo {
     /**
      * Clave para almacenar el token de autenticación
      */
-    const val KEY_DATA_TOKEN = "userDataToken"
+    const val KEY_AUHT_RESPONSE = "userAuthResponse"
 
-    /**
-     * Clave para almacenar la información del usuario
-     */
-    const val KEY_DATA_USER = "userDataInfo"
-
-    /**
-     * Clave para almacenar la cuenta en el bundle
-     */
-    const val KEY_BUNDLE_ACCOUNT = "account"
     /**
      * Clave para almacenar el nombre de la cuenta en el bundle
      */
     const val KEY_NAME_ACCOUNT = "nameAccount"
+
+    const val KEY_ACTIVE_ACCOUNT = "activeAccount"
 
     const val REQUEST_CODE_FIN_SESION = 3141592
 }
