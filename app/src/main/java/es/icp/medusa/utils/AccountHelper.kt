@@ -8,7 +8,8 @@ import android.util.Log
 import androidx.appcompat.app.AlertDialog
 import com.google.gson.Gson
 import es.icp.medusa.data.remote.modelos.AuthResponse
-import es.icp.medusa.utils.ConstantesAuthPerseo.KEY_DATA_TOKEN
+import es.icp.medusa.utils.ConstantesAuthPerseo.KEY_ACTIVE_ACCOUNT
+import es.icp.medusa.utils.ConstantesAuthPerseo.KEY_AUHT_RESPONSE
 import es.icp.medusa.utils.ConstantesAuthPerseo.MY_ACCOUNT_TYPE
 import es.icp.medusa.utils.ConstantesAuthPerseo.MY_AUTH_TOKEN_TYPE
 import java.util.*
@@ -66,7 +67,7 @@ fun AccountManager.getToken(account: Account) : String? =
  * @return Token de refresco almacenado en la cuenta
  */
 fun AccountManager.getRefreshToken(account: Account) : String {
-    val userDataString = this.getUserData(account, KEY_DATA_TOKEN)
+    val userDataString = this.getUserData(account, KEY_AUHT_RESPONSE)
     val userData =  Gson().fromJson(userDataString, AuthResponse::class.java)
     return userData.refreshToken
 }
@@ -100,7 +101,7 @@ fun AccountManager.getUsernameAndPass(account: Account): Pair<String, String> {
 fun AccountManager.createAccount(username: String, password: String, authResponse: AuthResponse, /*user:Any, appUserKey: String*/): Boolean {
     val account = Account(username, MY_ACCOUNT_TYPE)
 //    authResponse.dateExpire = Date().addSeconds((authResponse.expiresIn - 100))
-    val userData = Bundle().also { it.putString(KEY_DATA_TOKEN, Gson().toJson(authResponse))  }
+    val userData = Bundle().also { it.putString(KEY_AUHT_RESPONSE, Gson().toJson(authResponse))  }
     // creamos la cuenta
     val exito = this.addAccountExplicitly(account, password, userData)
     Log.w("CREAR CUENTA", "exito: $exito")
@@ -110,12 +111,12 @@ fun AccountManager.createAccount(username: String, password: String, authRespons
 }
 
 /**
- * Añade la información de autenticación a la cuenta especificada
+ * Añade la información y el token de autenticación a la cuenta especificada
  * @param account Cuenta a la que se quiere añadir la información de autenticación
  * @param authResponse Información de autenticación (authResponse)
  */
 fun AccountManager.setAuthResponse(authResponse: AuthResponse, account: Account) {
-    this.setUserData(account, KEY_DATA_TOKEN, Gson().toJson(authResponse))
+    this.setUserData(account, KEY_AUHT_RESPONSE, Gson().toJson(authResponse))
     this.setToken(account, authResponse.accessToken)
 }
 
@@ -125,47 +126,12 @@ fun AccountManager.setAuthResponse(authResponse: AuthResponse, account: Account)
  * @return Información de autenticación (authResponse)
  */
 fun AccountManager.getAuthResponse(account: Account) : AuthResponse? {
-    val userDataString = this.getUserData(account, KEY_DATA_TOKEN)
+    val userDataString = this.getUserData(account, KEY_AUHT_RESPONSE)
     return Gson().fromJson(userDataString, AuthResponse::class.java)
 }
 
-/**
- * Añade la información del usuario a la cuenta especificada
- * @param account Cuenta a la que se quiere añadir la información del usuario
- * @param usuario Información del usuario
- * @param key Clave de la información que se quiere obtener
- */
-fun AccountManager.setUserResponse(account: Account, key: String, usuario: Any) =
-    this.setUserData(account, key, Gson().toJson(usuario))
 
-/**
- * Obtiene la información del usuario de la cuenta especificada
- * @param account Cuenta de la que se quiere obtener la información del usuario
- * @param key Clave de la información que se quiere obtener
- * @return Información del usuario
- */
-fun AccountManager.getUserResponse(account: Account, key: String) : String? =
-    this.getUserData(account, key)
 
-/**
- * Elimina la información del usuario de la cuenta especificada
- * @param account Cuenta de la que se quiere eliminar la información del usuario
- * @param key Clave de la información que se quiere eliminar
- */
-fun AccountManager.clearUserResponse(account: Account, key: String) =
-    this.setUserData(account, key, null)
-
-private fun Date.add(field: Int, amount: Int): Date {
-    Calendar.getInstance().apply {
-        time = this@add
-        add(field, amount)
-        return time
-    }
-}
-
-private fun Date.addSeconds(seconds: Int): Date{
-    return add(Calendar.SECOND, seconds)
-}
 
 /**
  * Muestra un dialogo de seleccion de cuenta
@@ -196,6 +162,33 @@ fun AccountManager.choiceAccountDialog(context: Context, respuesta: (Account?) -
         }
         .create()
         .show()
-
 }
 
+fun AccountManager.setActiveAccountByPackageName(account: Account, packageName: String){
+    getMyAccounts().forEach {
+        if (it.name == account.name)
+            this.setUserData(it, packageName, "true")
+        else
+            this.setUserData(account, packageName, "true")
+    }
+}
+
+fun AccountManager.getActiveAccountByPackageName(packageName: String): Account =
+    this.accounts.first { this.getUserData(it, packageName) == "true" }
+
+fun AccountManager.getTokenByAccountActive(context: Context): String? {
+    val account = this.getActiveAccountByPackageName(context.applicationContext.packageName)
+    return this.getToken(account)
+}
+
+private fun Date.add(field: Int, amount: Int): Date {
+    Calendar.getInstance().apply {
+        time = this@add
+        add(field, amount)
+        return time
+    }
+}
+
+private fun Date.addSeconds(seconds: Int): Date{
+    return add(Calendar.SECOND, seconds)
+}
