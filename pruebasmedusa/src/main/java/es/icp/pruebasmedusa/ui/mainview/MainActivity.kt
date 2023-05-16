@@ -61,7 +61,7 @@ class MainActivity : AppCompatActivity() {
 
             vm.getTokenPerseo(AuthRequest("icp.5241","Temporal2."))
             val ac = accountManager.getAccountByName("icp.5241")
-            accountManager.setActiveAccountByPackageName(ac!!, BuildConfig.APPLICATION_ID)
+            ac?.let { accountManager.setActiveAccountByPackageName(it, BuildConfig.APPLICATION_ID) }
             delay(5000)
             val account = accountManager.getAccountByName("icp.12830")
 
@@ -70,28 +70,7 @@ class MainActivity : AppCompatActivity() {
 
             Log.w("MainActivity", "Account Active: ${accountManager.getActiveAccountByPackageName(BuildConfig.APPLICATION_ID)}")
 
-//            vm.isTokenValid(account!!)
-//            delay(2000)
-//            vm.refreshToken(account)
-//            delay(2000)
-//            vm.isTokenValid(account)
-
-
-            Log.w("MainActivity", "Active Account: ${ac?.name} - ${ac?.type}")
-            Log.w("MainActivity", "packagename: ${applicationContext.packageName}")
-            val boo = accountManager.setAccountVisibility(account, context.packageName, AccountManager.VISIBILITY_NOT_VISIBLE)
-//            delay(2000)
-//            vm.logOut(account)
-//            delay(2000)
-//            vm.isTokenValid(account)
-            Log.w("MainActivity", "Account Visibility: $boo")
-
-            delay(2000)
-            accountManager.setAccountVisibility(ac, context.packageName, AccountManager.VISIBILITY_NOT_VISIBLE)
-            accountManager.getAccountsByTypeForPackage( ConstantesAuthPerseo.MY_ACCOUNT_TYPE, applicationContext.packageName).forEach {
-                Log.w("MainActivity", "Account: ${it.name} - ${it.type}")
-            }
-
+            Log.w("MainActivity", "Account Active TOken: ${accountManager.getTokenByAccountActive(context)}")
         }
 
     }

@@ -173,12 +173,12 @@ fun AccountManager.setActiveAccountByPackageName(account: Account, packageName: 
     }
 }
 
-fun AccountManager.getActiveAccountByPackageName(packageName: String): Account =
-    this.accounts.first { this.getUserData(it, packageName) == "true" }
+fun AccountManager.getActiveAccountByPackageName(packageName: String): Account? =
+    this.accounts.firstOrNull { this.getUserData(it, packageName) == "true" }
 
 fun AccountManager.getTokenByAccountActive(context: Context): String? {
     val account = this.getActiveAccountByPackageName(context.applicationContext.packageName)
-    return this.getToken(account)
+    return this.getToken(account ?: return null)
 }
 
 private fun Date.add(field: Int, amount: Int): Date {
