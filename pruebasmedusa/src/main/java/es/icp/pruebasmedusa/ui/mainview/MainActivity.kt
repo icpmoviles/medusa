@@ -59,7 +59,7 @@ class MainActivity : AppCompatActivity() {
                 Log.w("MainActivity", "Account: ${it.name} - ${it.type}")
             }
 
-            vm.getTokenPerseo(AuthRequest("icp.5241","Temporal2."))
+            vm.getTokenPerseo(AuthRequest("icp.8831","VentuWork027$"))
             val ac = accountManager.getAccountByName("icp.5241")
             ac?.let { accountManager.setActiveAccountByPackageName(it, BuildConfig.APPLICATION_ID) }
             delay(5000)

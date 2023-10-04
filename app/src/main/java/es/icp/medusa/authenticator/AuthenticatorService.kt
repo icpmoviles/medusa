@@ -9,6 +9,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.os.IBinder
+import android.util.Log
 
 class AuthenticatorService: Service() {
 
@@ -16,6 +17,7 @@ class AuthenticatorService: Service() {
 
     override fun onCreate() {
         // Create a new authenticator object
+        Log.d("KK", "PEPOTE")
         mAuthenticator = Authenticator(this)
     }
 
