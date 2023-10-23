@@ -27,5 +27,8 @@ data class AuthResponse(
     @SerializedName("token_type")
     val tokenType: String = "Bearer",
 
-    var dateExpire: Date = Date()
+    var dateExpire: Date = Date(),
+
+    val guid: String = ""
+
 ) : Serializable
