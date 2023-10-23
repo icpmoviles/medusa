@@ -2,7 +2,6 @@ package es.icp.medusa.data.remote.service
 
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
-import es.icp.genericretrofit.communication.NetworkResponseAdapterFactory
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -25,7 +24,6 @@ object AuthRetrofit {
     ) : Retrofit {
         val builder = Retrofit.Builder()
             .baseUrl(baseUrl)
-            .addCallAdapterFactory(NetworkResponseAdapterFactory())
             .addConverterFactory(GsonConverterFactory.create(gson))
 
 

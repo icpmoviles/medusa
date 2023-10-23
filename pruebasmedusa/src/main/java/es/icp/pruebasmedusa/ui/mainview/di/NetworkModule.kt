@@ -1,41 +1,59 @@
 package es.icp.pruebasmedusa.ui.mainview.di
 
+import android.accounts.AccountManager
+import android.app.Application
 import android.content.Context
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import es.icp.genericretrofit.communication.ConnectivityInterceptor
-import es.icp.genericretrofit.communication.RetrofitBase
+import es.icp.medusa.data.remote.service.AuthRetrofit
+import es.icp.medusa.data.remote.service.AuthService
+import es.icp.medusa.repositorio.AuthRepo
 import es.icp.pruebasmedusa.ui.mainview.service.MockService
 import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.create
 import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
 
 @Module
-@InstallIn(SingletonComponent::class) // Esto no tiene nada que ver con un Singleton, estoy indicando que todos los inject que declare aqui serán a nivel da aplicacion.
+@InstallIn(SingletonComponent::class)
 class NetworkModule {
-
-    @Singleton // Ahora si, especifico que solo me cree una instancia a nivel de la aplicación
-    @Provides
-    fun provideRetrofit(context: Context): Retrofit {
-        // TODO BUILD VARIANTS
-        return RetrofitBase.getInstance(
-            baseUrl = "https://ticketingicp.icp.es:9013/",
-            client = OkHttpClient.Builder().apply {
-                interceptors().add(ConnectivityInterceptor(context))
-                readTimeout(1, TimeUnit.MINUTES)
-                writeTimeout(1, TimeUnit.MINUTES)
-                connectTimeout(1, TimeUnit.MINUTES)
-            }.build()
-        )
-    }
 
     @Singleton
     @Provides
-    fun provideRecepcionesService(retrofit: Retrofit): MockService {
-        return retrofit.create(MockService::class.java)
+    fun getRetrofit(): Retrofit {
+
+        val loggingInterceptor = HttpLoggingInterceptor().apply {
+            level =
+                HttpLoggingInterceptor.Level.BODY // Puedes cambiar el nivel de logging según tus necesidades
+        }
+
+        val client = OkHttpClient.Builder()
+            .addInterceptor(loggingInterceptor)
+            .build()
+
+        return Retrofit.Builder()
+            .addConverterFactory(GsonConverterFactory.create())
+            .client(client)
+            .baseUrl("https://ticketingicp.icp.es:9013/").build()
     }
 
+    @Provides
+    @Singleton
+    fun provideAuthRepo(accountManager: AccountManager): AuthRepo {
+        return AuthRepo(
+            authService = this.getRetrofit().create(),
+            am = accountManager
+        )
+    }
+
+    @Provides
+    @Singleton
+    fun provideAccountManager(context: Context): AccountManager {
+        return AccountManager.get(context)
+    }
 }

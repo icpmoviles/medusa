@@ -35,7 +35,7 @@ class AlarmReciever: BroadcastReceiver() {
         if (nameAccount.isNotBlank()){
             val account : Account? = am.getAccountByName(nameAccount)
 
-//            if (appInForeground(context)) {
+            if (appInForeground(context)) {
 //                Log.w("::::", "APP EN PRIMER PLANO")
 //                account?.let {
 //                    am.refreshAuthToken(context, it){ result ->
@@ -56,19 +56,16 @@ class AlarmReciever: BroadcastReceiver() {
 //                    createNotificationChannel(context)
 //                    notifyNotification(context, nameAccount)
 //                }
-//            }
-//            else {
+            }
+            else {
 //                account?.let {
 //                    am.clearAuthToken(it)
 //                }
 //                createNotificationChannel(context)
 //                notifyNotification(context, nameAccount)
-//
-//            }
+
+            }
         }
-
-
-//        Log.w("EEEEEEEEEEEEEEEEE", "AGARRALO FUERTE BROTHER")
     }
 
     private fun createNotificationChannel(context: Context) {
