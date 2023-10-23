@@ -1,6 +1,5 @@
 package es.icp.medusa.data.remote.service
 
-import es.icp.genericretrofit.utils.GenericResponse
 import es.icp.medusa.data.remote.modelos.AuthRequest
 import es.icp.medusa.data.remote.modelos.AuthResponse
 import retrofit2.Response
@@ -11,7 +10,7 @@ import retrofit2.http.*
  * Las aplicaciones que vayan bajo PERSEO deben implementar este servicio para poder autenticarse
  */
 interface AuthService {
-    companion object{
+    companion object {
         const val ENDPOINT_LOGIN = "icpsec/Login"
         const val ENDPOINT_LOGOUT = "icpsec/Logout"
         const val ENDPOINT_IS_TOKEN_VALID = "icpsec/IsTokenValid"
@@ -27,9 +26,9 @@ interface AuthService {
      *   401 si el usuario y contraseña no son correctos
      */
     @POST(ENDPOINT_LOGIN)
-    suspend fun getTokenPerseo (
+    suspend fun getTokenPerseo(
         @Body request: AuthRequest
-    ) : GenericResponse<AuthResponse>
+    ): Response<AuthResponse>
 
     /**
      * Refresca el token de autenticación en el servidor
@@ -45,7 +44,7 @@ interface AuthService {
     suspend fun refreshAuthToken(
         @Header("Authorization") token: String,
         @Field("icprt") icprt: String
-    ): GenericResponse<AuthResponse>
+    ): Response<AuthResponse>
 
     /**
      * Invalida el token de autenticación en el servidor
@@ -58,7 +57,7 @@ interface AuthService {
     @Headers("ih: H4sIAAAAAAACCqpW8kxxLChQslIwNK8FAAAA//8=")
     suspend fun logOut(
         @Header("Authorization") token: String
-    ): GenericResponse<Unit>
+    ): Response<Unit>
 
     /**
      * Comprueba si el token de autenticación es válido contra el servidor
@@ -69,7 +68,7 @@ interface AuthService {
      */
     @GET(ENDPOINT_IS_TOKEN_VALID)
     @Headers("ih: H4sIAAAAAAACCqpW8kxxLChQslIwNK8FAAAA//8=")
-    suspend fun isTokenValid (
+    suspend fun isTokenValid(
         @Header("Authorization") token: String
-    ): GenericResponse<Void>
+    ): Response<Void>
 }

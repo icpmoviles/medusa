@@ -2,154 +2,143 @@ package es.icp.medusa.repositorio
 
 import android.accounts.Account
 import android.accounts.AccountManager
-import android.util.Log
-import es.icp.genericretrofit.utils.*
 import es.icp.medusa.data.remote.modelos.AuthRequest
 import es.icp.medusa.data.remote.service.AuthService
 import es.icp.medusa.utils.*
-import kotlinx.coroutines.flow.update
-
 
 class AuthRepo constructor(
     private val authService: AuthService,
-    private val am : AccountManager
-    ) {
+    private val am: AccountManager
+) {
 
     /**
      * Obtiene el token de Perseo y lo guarda en el AccountManager ya sea creando una nueva cuenta o
      * actualizando la cuenta existente
+     * @throws MedusaAuthException si no se ha podido obtener el token
+     * @throws MedusaAuthExceptionNoDataFound si la llamada ha sido satisfactoria pero no se han obtenido datos
      * @param request AuthRequest (username, password)
-     * @return Pair<Boolean, String?>?
+     * @return Boolean
      *      true: si se ha obtenido el token
      *      false: si no se ha obtenido el token
      *      String: mensaje de error en caso de que no se haya obtenido el token
      */
-    suspend fun getTokenPerseo( request: AuthRequest) : Pair<Boolean, String?>? {
-        var exito : Pair<Boolean, String?>? = null
-        authService.getTokenPerseo( request)
-            .onSuccess { authResponse ->
-                Log.w("authRepo", "getAuthToken: $authResponse")
+    suspend fun getTokenPerseo(request: AuthRequest): Boolean {
+
+        val response = authService.getTokenPerseo(request)
+
+        return if (response.isSuccessful) {
+            response.body()?.let { authResponse ->
                 val cuenta = am.getAccountByName(request.username)
                 cuenta?.let {
                     am.setAuthResponse(authResponse, it)
-                }?: run {
+                } ?: run {
                     am.createAccount(
                         username = request.username,
                         password = request.password,
-                        authResponse = authResponse)
+                        authResponse = authResponse
+                    )
                 }
-                exito = Pair(true, null)
-                return@onSuccess
+            } ?: run {
+                throw MedusaAuthExceptionNoDataFound("La llamada fue satisfactoria pero no se han obtenido datos")
             }
-            .onError { code, message ->
-                Log.w("onError getToken", "mensaje: $message code: $code")
-                exito = Pair(
-                    false,
-                    if (code == 401) "Usuario o contraseña incorrectos." else message
-                )
-            }
-            .onException { ex ->
-                exito = Pair(false, ex.message)
-
-            }
-        return exito
+            true
+        } else {
+            throw MedusaAuthException("Ocurrió un error al solicitar el token (${response.message()})")
+        }
     }
 
     /**
      * Comprueba si el token es válido contra el servidor
-     * @param token Token a comprobar
-     * @return Pair<Boolean, String?>?
+     * @throws MedusaAuthException si no se ha podido comprobar el token
+     * @throws MedusaAuthExceptionNoDataFound si la llamada ha sido satisfactoria pero no se han obtenido datos
+     * @return Boolean
      *     true: si el token es válido
      *     false: si el token no es válido
      *     String: mensaje de error en caso de que no se haya podido comprobar el token
      */
-    suspend fun isTokenValid(account: Account) : Pair<Boolean, String?>? {
-        var exito : Pair<Boolean, String?>? = null
-        val token = am.getToken(account)
-        token?.let {
-            authService.isTokenValid("Bearer $it")
-                .onSuccess { s ->
-                    Log.w("isTokenValid", "onSuccess: $s")
-                    exito = Pair(true, null)
-                    return@onSuccess
-                }
-                .onError { code, message ->
-                    exito =
-                        if (code == HttpCodes.ERROR_204_NOT_CONTENT) Pair(true, null)
-                        else Pair(false, message)
-                    Log.w("isTokenValid", "onError: $message")
-                }
-                .onException { ex ->
-                    exito = Pair(false, ex.message)
-                    Log.w("isTokenValid", "onException: ${ex.message}")
-                }
+    suspend fun isTokenValid(account: Account): Boolean {
 
-        }?: kotlin.run { exito = Pair(false, "No se ha encontrado el token") }
+        am.getToken(account)?.let { token ->
 
-        return exito
+            val response = authService.isTokenValid("Bearer $token")
+
+            //Esta llamada puede dar un 204 y lo tenemos que considerar como un token válido
+            return if (response.isSuccessful) {
+                response.code() == 200 || response.code() == 204
+            } else {
+                throw MedusaAuthException("Ocurrió un error al validar el token (${response.message()})")
+            }
+        } ?: run {
+            throw MedusaAuthExceptionNoDataFound("No se ha encontrado el token o no esta disponible")
+        }
     }
 
     /**
      * Invalida el token y lo elimina del Account Manager
      * @param account Cuenta a la que pertenece el token
-     * @return Pair<Boolean, String?>?
+     * @throws MedusaAuthException si no se ha podido invalidar el token
+     * @throws MedusaAuthExceptionNoDataFound si la llamada ha sido satisfactoria pero no se han obtenido datos
+     * @return Boolean
      *    true: si se ha invalidado el token
      *    false: si no se ha podido invalidar el token
      *    String: mensaje de error en caso de que no se haya podido invalidar el token
      */
-    suspend fun logOut (account: Account): Pair<Boolean, String?>? {
-        var exito : Pair<Boolean, String?>? = null
-        val token = am.getToken(account)
-        token?.let {
-            authService.logOut("Bearer $it")
-                .onSuccess {
-                    Log.w("logOut", "onSuccess: $it")
-                    am.clearToken(account)
-                    exito = Pair(true, null)
-                }
-                .onError { code, message ->
-                    exito = Pair(false, message)
-                    Log.w("logOut", "code $code onError: $message")
-                }
-                .onException { ex ->
-                    exito = Pair(false, ex.message)
-                    Log.w("logOut", "onException: ${ex.message}")
-                }
-        } ?: run { exito = Pair(false, "No se ha encontrado el token") }
+    suspend fun logOut(account: Account): Boolean {
 
-        return exito
+        am.getToken(account)?.let { token ->
+
+            val response = authService.logOut("Bearer $token")
+
+            return if (response.isSuccessful) {
+                am.clearToken(account)
+                true
+            } else {
+                throw MedusaAuthException("Ocurrió un error al invalidar el token (${response.message()})")
+            }
+
+        } ?: run {
+            throw MedusaAuthExceptionNoDataFound("No se ha encontrado el token o no esta disponible")
+        }
     }
 
     /**
      * Refresca el token de autenticación y lo guarda en el Account Manager
      * @param account Cuenta a la que pertenece el token
-     * @return Pair<Boolean, String?>?
+     * @throws MedusaAuthException si no se ha podido refrescar el token
+     * @throws MedusaAuthExceptionNoDataFound si la llamada ha sido satisfactoria pero no se han obtenido datos
+     * @return Boolean
      *   true: si se ha refrescado el token
      *   false: si no se ha podido refrescar el token
      *   String: mensaje de error en caso de que no se haya podido refrescar el token
      */
-    suspend fun refreshToken (account: Account): Pair<Boolean, String?>? {
-        var exito : Pair<Boolean, String?>? = null
-        val token = am.getToken(account).orEmpty()
-        val refreshToken = am.getRefreshToken(account)
+    suspend fun refreshToken(account: Account): Boolean {
 
-        authService.refreshAuthToken("Bearer $token", refreshToken)
-            .onSuccess {
-                Log.w("refreshToken", "onSuccess: $it")
-                am.setAuthResponse(it, account)
-                am.setToken(account, it.accessToken)
-                exito = Pair(true, null)
+        am.getToken(account)?.let { token ->
+
+            val refreshToken = am.getRefreshToken(account)
+
+            val response = authService.refreshAuthToken("Bearer $token", refreshToken)
+
+            return if (response.isSuccessful) {
+
+                response.body()?.let { authResponse ->
+                    am.setAuthResponse(authResponse, account)
+                    am.setToken(account, authResponse.accessToken)
+                } ?: run {
+                    throw MedusaAuthExceptionNoDataFound("La llamada fue satisfactoria pero no se han obtenido datos")
+                }
+
+                true
+            } else {
+                throw MedusaAuthException("Ocurrió un error al refrescar el token (${response.message()})")
             }
-            .onError { code, message ->
-                exito = Pair(false, message)
-                Log.w("refreshToken", "code $code onError: $message")
-            }
-            .onException { ex ->
-                exito = Pair(false, ex.message)
-                Log.w("refreshToken", "onException: ${ex.message}")
-            }
-        return exito
+
+        } ?: run {
+            throw MedusaAuthExceptionNoDataFound("No se ha encontrado el token o no esta disponible")
+        }
     }
-
 }
+
+class MedusaAuthException(message: String?) : Exception(message)
+class MedusaAuthExceptionNoDataFound(message: String?) : Exception(message)
 

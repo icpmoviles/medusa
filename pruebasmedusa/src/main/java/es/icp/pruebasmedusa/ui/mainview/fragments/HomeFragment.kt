@@ -2,15 +2,25 @@ package es.icp.pruebasmedusa.ui.mainview.fragments
 
 import android.accounts.Account
 import android.accounts.AccountManager
+import android.app.AlarmManager
+import android.app.PendingIntent
 import android.content.Context
+import android.content.Intent
+import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import com.google.gson.Gson
+import es.icp.medusa.authenticator.AlarmReciever
 import es.icp.medusa.data.remote.modelos.AuthResponse
+import es.icp.medusa.utils.ConstantesAuthPerseo.KEY_NAME_ACCOUNT
+import es.icp.medusa.utils.getAuthResponse
 import es.icp.pruebasmedusa.databinding.FragmentHomeBinding
+import es.icp.pruebasmedusa.ui.mainview.MainActivity
 
 
 class HomeFragment : Fragment() {
@@ -21,8 +31,6 @@ class HomeFragment : Fragment() {
     private lateinit var currentAccount: Account
     private lateinit var am: AccountManager
     private lateinit var authResponse: AuthResponse
-
-
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -38,13 +46,13 @@ class HomeFragment : Fragment() {
         setUpView()
     }
     private fun setUpView() {
-        am = AccountManager.get(requireContext())
-        (activity as AppCompatActivity).supportActionBar?.title = "Home Fragment"
-        //usar variable del activity padre
-//        currentAccount = (activity as? MainActivity)?.account!!
+//        am = AccountManager.get(requireContext())
+//        (activity as AppCompatActivity).supportActionBar?.title = "Home Fragment"
+//        //usar variable del activity padre
+//        currentAccount = (requireActivity() as MainActivity).account
 //        binding.txt.text = currentAccount.toString()
-
-
+//
+//
 //        authResponse =
 //            Gson().fromJson(am.getUserData(currentAccount, KEY_USERDATA_TOKEN), AuthResponse::class.java)
 //
@@ -85,17 +93,17 @@ class HomeFragment : Fragment() {
     }
 
     fun cancelAlarm(context: Context){
-//        val alarmManager = context.getSystemService(AppCompatActivity.ALARM_SERVICE) as AlarmManager?
-//        val i = Intent(requireContext(), AlarmReciever::class.java).putExtra(KEY_NAME_ACCOUNT, currentAccount.name )
-//
-//
-//            val pi = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
-//                PendingIntent.getBroadcast(requireContext(), Constantes.REQUEST_CODE_FIN_SESION, i, PendingIntent.FLAG_CANCEL_CURRENT) // estab en 0
-//            }
-//            else {
-//                PendingIntent.getBroadcast(requireContext(), Constantes.REQUEST_CODE_FIN_SESION, i, PendingIntent.FLAG_MUTABLE)
-//            }
-//
-//        alarmManager!!.cancel(pi)
+        val alarmManager = context.getSystemService(AppCompatActivity.ALARM_SERVICE) as AlarmManager?
+        val i = Intent(requireContext(), AlarmReciever::class.java).putExtra(KEY_NAME_ACCOUNT, currentAccount.name )
+
+
+            val pi = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+                PendingIntent.getBroadcast(requireContext(), 3141592, i, PendingIntent.FLAG_CANCEL_CURRENT) // estab en 0
+            }
+            else {
+                PendingIntent.getBroadcast(requireContext(), 3141592, i, PendingIntent.FLAG_MUTABLE)
+            }
+
+        alarmManager!!.cancel(pi)
     }
 }
