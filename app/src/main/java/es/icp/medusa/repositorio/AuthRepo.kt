@@ -3,11 +3,13 @@ package es.icp.medusa.repositorio
 import android.accounts.Account
 import android.accounts.AccountManager
 import android.util.Log
+import com.google.gson.GsonBuilder
 import es.icp.genericretrofit.utils.*
 import es.icp.medusa.data.remote.modelos.AuthRequest
 import es.icp.medusa.data.remote.service.AuthService
 import es.icp.medusa.utils.*
 import kotlinx.coroutines.flow.update
+import org.apache.commons.codec.binary.Base64
 
 
 class AuthRepo constructor(
@@ -24,11 +26,19 @@ class AuthRepo constructor(
      *      false: si no se ha obtenido el token
      *      String: mensaje de error en caso de que no se haya obtenido el token
      */
-    suspend fun getTokenPerseo( request: AuthRequest) : Pair<Boolean, String?>? {
+    suspend fun getTokenPerseo(request: AuthRequest) : Pair<Boolean, String?>? {
         var exito : Pair<Boolean, String?>? = null
-        authService.getTokenPerseo( request)
+        authService.getTokenPerseo(request)
             .onSuccess { authResponse ->
                 Log.w("authRepo", "getAuthToken: $authResponse")
+
+                val gson = GsonBuilder().serializeNulls().create()
+                val json = gson.toJson(authResponse)
+                val loginBase64String = String(Base64.encodeBase64(json.toByteArray()))
+
+                val guidResponse = authService.GenerateSecurityGuidFromCredentials("Bearer " + authResponse.accessToken, loginBase64String)
+                authResponse.guid = guidResponse
+
                 val cuenta = am.getAccountByName(request.username)
                 cuenta?.let {
                     am.setAuthResponse(authResponse, it)

@@ -41,6 +41,7 @@ class MainViewModel @Inject constructor(
 
     var account : Account? = am.getAccountByName(userName.value.orEmpty())
     val token = account?.let { am.getToken(it).orEmpty() }
+
     private val authService : AuthService = AuthRetrofit.getInstance(
         baseUrl = "https://ticketingicp.icp.es:9013/",
         client =
