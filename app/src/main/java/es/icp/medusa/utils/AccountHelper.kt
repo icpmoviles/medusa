@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AlertDialog
 import com.google.gson.Gson
+import es.icp.medusa.data.remote.modelos.AuthRequest
 import es.icp.medusa.data.remote.modelos.AuthResponse
 import es.icp.medusa.utils.ConstantesAuthPerseo.KEY_ACTIVE_ACCOUNT
 import es.icp.medusa.utils.ConstantesAuthPerseo.KEY_AUHT_RESPONSE
@@ -89,6 +90,18 @@ fun AccountManager.getUsernameAndPass(account: Account): Pair<String, String> {
     val username = account.name
     val password = this.getPassword(account)
     return Pair(username, password)
+}
+
+/**
+ * Obtiene el nombre de usuario y la contraseña de la cuenta especificada
+ * @param account Cuenta de la que se quiere obtener el nombre de usuario y la contraseña
+ * @return Pair con el nombre de usuario y la contraseña
+ *
+ */
+fun AccountManager.getAuthRequest(account: Account): AuthRequest {
+    val username = account.name
+    val password = this.getPassword(account)
+    return AuthRequest(username, password)
 }
 
 /**

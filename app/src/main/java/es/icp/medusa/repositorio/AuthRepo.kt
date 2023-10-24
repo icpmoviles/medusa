@@ -2,9 +2,12 @@ package es.icp.medusa.repositorio
 
 import android.accounts.Account
 import android.accounts.AccountManager
+import com.google.gson.GsonBuilder
 import es.icp.medusa.data.remote.modelos.AuthRequest
+import es.icp.medusa.data.remote.modelos.AuthResponse
 import es.icp.medusa.data.remote.service.AuthService
 import es.icp.medusa.utils.*
+import org.apache.commons.codec.binary.Base64
 
 class AuthRepo constructor(
     private val authService: AuthService,
@@ -22,12 +25,21 @@ class AuthRepo constructor(
      *      false: si no se ha obtenido el token
      *      String: mensaje de error en caso de que no se haya obtenido el token
      */
-    suspend fun getTokenPerseo(request: AuthRequest): Boolean {
+    suspend fun getTokenPerseo(request: AuthRequest): AuthResponse? {
 
         val response = authService.getTokenPerseo(request)
 
         return if (response.isSuccessful) {
+            var authResponseReturnable: AuthResponse? = null
             response.body()?.let { authResponse ->
+                val gson = GsonBuilder().serializeNulls().create()
+                val json = gson.toJson(authResponse)
+                val loginBase64String = String(Base64.encodeBase64(json.toByteArray()))
+
+                val guidResponse = authService.GenerateSecurityGuidFromCredentials("Bearer " + authResponse.accessToken, loginBase64String)
+                authResponse.guid = guidResponse
+                authResponseReturnable = authResponse
+
                 val cuenta = am.getAccountByName(request.username)
                 cuenta?.let {
                     am.setAuthResponse(authResponse, it)
@@ -41,7 +53,7 @@ class AuthRepo constructor(
             } ?: run {
                 throw MedusaAuthExceptionNoDataFound("La llamada fue satisfactoria pero no se han obtenido datos")
             }
-            true
+            return authResponseReturnable
         } else {
             throw MedusaAuthException("Ocurrió un error al solicitar el token (${response.message()})")
         }

@@ -55,22 +55,22 @@ class MainActivity : AppCompatActivity() {
 //        vm.getAuthToken("https://ticketingicp.icp.es:9013/" + AuthService.ENDPOINT_LOGIN, AuthRequest("icp.5241","Temporal2."))
 
         lifecycleScope.launch {
-            accountManager.getMyAccounts().forEach {
-                Log.w("MainActivity", "Account: ${it.name} - ${it.type}")
-            }
-
-            vm.getTokenPerseo(AuthRequest("icp.8831","VentuWork027$"))
-            val ac = accountManager.getAccountByName("icp.5241")
-            ac?.let { accountManager.setActiveAccountByPackageName(it, BuildConfig.APPLICATION_ID) }
-            delay(5000)
-            val account = accountManager.getAccountByName("icp.12830")
-
-            val mapa : HashMap<String, Boolean> = HashMap()
-
-
-            Log.w("MainActivity", "Account Active: ${accountManager.getActiveAccountByPackageName(BuildConfig.APPLICATION_ID)}")
-
-            Log.w("MainActivity", "Account Active TOken: ${accountManager.getTokenByAccountActive(context)}")
+//            accountManager.getMyAccounts().forEach {
+//                Log.w("MainActivity", "Account: ${it.name} - ${it.type}")
+//            }
+//
+//            vm.getTokenPerseo(AuthRequest("icp.8831","VentuWork027$"))
+//            val ac = accountManager.getAccountByName("icp.5241")
+//            ac?.let { accountManager.setActiveAccountByPackageName(it, BuildConfig.APPLICATION_ID) }
+//            delay(5000)
+//            val account = accountManager.getAccountByName("icp.12830")
+//
+//            val mapa : HashMap<String, Boolean> = HashMap()
+//
+//
+//            Log.w("MainActivity", "Account Active: ${accountManager.getActiveAccountByPackageName(BuildConfig.APPLICATION_ID)}")
+//
+//            Log.w("MainActivity", "Account Active TOken: ${accountManager.getTokenByAccountActive(context)}")
         }
 
     }

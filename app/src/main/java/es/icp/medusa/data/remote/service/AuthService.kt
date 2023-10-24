@@ -15,6 +15,7 @@ interface AuthService {
         const val ENDPOINT_LOGOUT = "icpsec/Logout"
         const val ENDPOINT_IS_TOKEN_VALID = "icpsec/IsTokenValid"
         const val ENDPOINT_REFRESH_TOKEN = "icpsec/RefreshToken"
+        const val ENDPOINT_GENERATE_GUID_FROM_CREDENTIALS = "icpsec/GenerateSecurityGuidFromCredentials"
     }
 
     /**
@@ -29,6 +30,14 @@ interface AuthService {
     suspend fun getTokenPerseo(
         @Body request: AuthRequest
     ): Response<AuthResponse>
+
+    @Headers("ih: H4sIAAAAAAACCqpW8kxxLChQslIwNK8FAAAA//8=")
+    @FormUrlEncoded
+    @POST(ENDPOINT_GENERATE_GUID_FROM_CREDENTIALS)
+    suspend fun GenerateSecurityGuidFromCredentials(
+        @Header("Authorization") accessToken: String,
+        @Field("tfisg") tfisg: String,
+    ) : String
 
     /**
      * Refresca el token de autenticación en el servidor

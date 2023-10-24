@@ -29,6 +29,6 @@ data class AuthResponse(
 
     var dateExpire: Date = Date(),
 
-    val guid: String = ""
+    var guid: String = ""
 
 ) : Serializable

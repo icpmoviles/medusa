@@ -9,13 +9,16 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import es.icp.medusa.data.remote.modelos.AuthRequest
 import es.icp.medusa.repositorio.AuthRepo
+import es.icp.medusa.utils.MedusaManager
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
     application: Application, // esto solo esta por los toast, para no enredar mas a una app de prueba.
-    private val authRepo: AuthRepo
+    private val authRepo: AuthRepo,
+    private val medusaManager: MedusaManager
 ) : AndroidViewModel(application) {
 
 //    private val accountManager: AccountManager = AccountManager.get(getApplication())
@@ -25,6 +28,21 @@ class MainViewModel @Inject constructor(
         try {
             authRepo.getTokenPerseo(request).also {
                 Log.d("getTokenPerseo", request.username)
+            }
+        } catch (e: Exception) {
+            Toast.makeText(
+                getApplication(),
+                "Excepcion detectada mira el logcat para más información.",
+                Toast.LENGTH_LONG
+            ).show()
+            e.printStackTrace()
+        }
+    }
+
+    fun getActiveGUI() = viewModelScope.launch(Dispatchers.IO) {
+        try {
+            medusaManager.getActiveGUIDForBlazorLoad().also {
+                Log.d("getActiveGUI", "getActiveGUI: $it")
             }
         } catch (e: Exception) {
             Toast.makeText(

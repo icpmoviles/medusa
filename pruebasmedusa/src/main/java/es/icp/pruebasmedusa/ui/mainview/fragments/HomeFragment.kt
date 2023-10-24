@@ -14,6 +14,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import com.google.gson.Gson
 import es.icp.medusa.authenticator.AlarmReciever
 import es.icp.medusa.data.remote.modelos.AuthResponse
@@ -21,6 +22,7 @@ import es.icp.medusa.utils.ConstantesAuthPerseo.KEY_NAME_ACCOUNT
 import es.icp.medusa.utils.getAuthResponse
 import es.icp.pruebasmedusa.databinding.FragmentHomeBinding
 import es.icp.pruebasmedusa.ui.mainview.MainActivity
+import es.icp.pruebasmedusa.ui.mainview.MainViewModel
 
 
 class HomeFragment : Fragment() {
@@ -31,6 +33,8 @@ class HomeFragment : Fragment() {
     private lateinit var currentAccount: Account
     private lateinit var am: AccountManager
     private lateinit var authResponse: AuthResponse
+
+    private val mainViewModel: MainViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -46,6 +50,11 @@ class HomeFragment : Fragment() {
         setUpView()
     }
     private fun setUpView() {
+
+        binding.btnGetGUID.setOnClickListener {
+            mainViewModel.getActiveGUI()
+        }
+
 //        am = AccountManager.get(requireContext())
 //        (activity as AppCompatActivity).supportActionBar?.title = "Home Fragment"
 //        //usar variable del activity padre
