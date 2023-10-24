@@ -1,5 +1,6 @@
 package es.icp.medusa.utils
 
+import android.accounts.Account
 import android.accounts.AccountManager
 import android.app.Application
 import android.util.Log
@@ -41,7 +42,7 @@ class MedusaManager @Inject constructor(
                 Log.d(TAG, "getActiveGUIDForBlazorLoad: perseoAccount: $perseoAccount")
                 perseoAccount?.let {
                     Log.d(TAG, "getActiveGUIDForBlazorLoad: MedusaActiveGUIDState.Success")
-                    emit(MedusaActiveGUIDState.Success(perseoAccount))
+                    emit(MedusaActiveGUIDState.Success(perseoAccount, account))
                 }
                 return@flow
             }
@@ -52,7 +53,7 @@ class MedusaManager @Inject constructor(
             Log.d(TAG, "getActiveGUIDForBlazorLoad: login: $login")
             login?.let {
                 Log.d(TAG, "getActiveGUIDForBlazorLoad: MedusaActiveGUIDState.Success")
-                emit(MedusaActiveGUIDState.Success(login))
+                emit(MedusaActiveGUIDState.Success(login, account))
             }?: run {
                 Log.d(TAG, "getActiveGUIDForBlazorLoad: MedusaActiveGUIDState.Error")
                 emit(MedusaActiveGUIDState.Error(MedusaAuthException("Error al obtener el login")))
@@ -77,7 +78,7 @@ sealed class LoginState {
 
 sealed class MedusaActiveGUIDState {
     object Loading: MedusaActiveGUIDState()
-    data class Success(val auth: AuthResponse): MedusaActiveGUIDState()
+    data class Success(val auth: AuthResponse, val account: Account): MedusaActiveGUIDState()
     object NotFound: MedusaActiveGUIDState()
     data class Error(val error: Throwable): MedusaActiveGUIDState()
 }
