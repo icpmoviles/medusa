@@ -43,8 +43,10 @@ class MedusaManager @Inject constructor(
                 perseoAccount?.let {
                     Log.d(TAG, "getActiveGUIDForBlazorLoad: MedusaActiveGUIDState.Success")
                     emit(MedusaActiveGUIDState.Success(perseoAccount, account))
+                }?: run {
+                    Log.d(TAG, "getActiveGUIDForBlazorLoad: MedusaActiveGUIDState.Error")
+                    emit(MedusaActiveGUIDState.Error(MedusaAuthException("Error al obtener el login")))
                 }
-                return@flow
             }
 
             val authRequest = accountManager.getAuthRequest(account)

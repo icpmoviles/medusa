@@ -11,6 +11,7 @@ import es.icp.medusa.data.remote.modelos.AuthRequest
 import es.icp.medusa.repositorio.AuthRepo
 import es.icp.medusa.utils.MedusaManager
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -41,7 +42,7 @@ class MainViewModel @Inject constructor(
 
     fun getActiveGUI() = viewModelScope.launch(Dispatchers.IO) {
         try {
-            medusaManager.getActiveGUIDForBlazorLoad().also {
+            medusaManager.getActiveGUIDForBlazorLoad().collect {
                 Log.d("getActiveGUI", "getActiveGUI: $it")
             }
         } catch (e: Exception) {
