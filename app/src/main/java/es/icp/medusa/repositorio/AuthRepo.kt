@@ -8,10 +8,11 @@ import es.icp.medusa.data.remote.modelos.AuthResponse
 import es.icp.medusa.data.remote.service.AuthService
 import es.icp.medusa.utils.*
 import org.apache.commons.codec.binary.Base64
+import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class AuthRepo constructor(
+class AuthRepo @Inject constructor(
     private val authService: AuthService,
     private val am: AccountManager
 ) {
