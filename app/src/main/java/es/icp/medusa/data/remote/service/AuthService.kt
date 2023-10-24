@@ -4,6 +4,7 @@ import es.icp.medusa.data.remote.modelos.AuthRequest
 import es.icp.medusa.data.remote.modelos.AuthResponse
 import retrofit2.Response
 import retrofit2.http.*
+import javax.inject.Singleton
 
 /**
  * Servicio de autenticación de PERSEO

@@ -1,7 +1,7 @@
-package es.icp.pruebasmedusa.ui.mainview.di
+package es.icp.medusa.di
 
+import android.accounts.AccountManager
 import android.app.Application
-import android.content.Context
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -10,12 +10,12 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-class ApplicationModule {
+class AccountManagerModule {
 
     @Provides
     @Singleton
-    fun provideContext(application: Application): Context {
-        return application.applicationContext
+    fun provideAccountManager(application: Application): AccountManager {
+        return AccountManager.get(application)
     }
 
 }
