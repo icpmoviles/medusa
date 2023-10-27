@@ -25,4 +25,6 @@ object ConstantesAuthPerseo {
     const val KEY_ACTIVE_ACCOUNT = "activeAccount"
 
     const val REQUEST_CODE_FIN_SESION = 3141592
+
+    const val MEDUSA_RETROFIT = "MEDUSA_RETROFIT"
 }

@@ -9,10 +9,12 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import es.icp.medusa.BuildConfig
 import es.icp.medusa.data.remote.service.AuthService
+import es.icp.medusa.utils.ConstantesAuthPerseo
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import javax.inject.Named
 import javax.inject.Singleton
 
 @Module
@@ -21,6 +23,7 @@ class RetrofitModule {
 
     @Provides
     @Singleton
+    @Named(ConstantesAuthPerseo.MEDUSA_RETROFIT)
     fun getRetrofit(context: Context): Retrofit {
         val loggingInterceptor = HttpLoggingInterceptor().apply {
             level =
@@ -39,7 +42,7 @@ class RetrofitModule {
 
     @Provides
     @Singleton
-    fun getAuthService(retrofit: Retrofit): AuthService {
+    fun getAuthService(@Named(ConstantesAuthPerseo.MEDUSA_RETROFIT) retrofit: Retrofit): AuthService {
         return retrofit.create(AuthService::class.java)
     }
 
